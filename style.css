@@ -1,71 +1,45 @@
-body {
-  margin: 0;
-  overflow: hidden;
+/* UI поверх */
+.ui {
+  position: absolute;
+  font-size: 22px;
+  font-weight: bold;
+  color: white;
 }
 
-.screen {
-  display: none;
+.score {
+  top: 6%;
+  left: 15%;
+}
+
+.coins {
+  top: 6%;
+  right: 10%;
+}
+
+.lives {
+  top: 12%;
+  left: 15%;
+}
+
+/* canvas */
+#gameCanvas {
   position: absolute;
   width: 100%;
   height: 100%;
 }
 
-.screen.active {
-  display: block;
-}
-
-.bg {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-/* кнопки */
-.click {
+/* continue кнопки */
+.continue-btn {
   position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 240px;
-  height: 70px;
+  width: 120px;
+  height: 100px;
+  top: 55%;
 }
 
-.start { top: 38%; }
-.shop { top: 48%; }
-.appearance { top: 58%; }
-.leaderboard { top: 68%; }
-
-.full {
-  position: absolute;
-  width: 100%;
-  height: 100%;
+.continue-btn.left {
+  left: 25%;
 }
 
-/* back */
-.back {
-  position: absolute;
-  bottom: 6%;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 220px;
-  height: 90px;
-}
-
-/* CONTINUE overlay */
-.overlay {
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  background: rgba(0,0,0,0.4);
-}
-
-.popup {
-  position: absolute;
-  width: 70%;
-  left: 50%;
-  top: 30%;
-  transform: translate(-50%, -50%);
-}
-
-.hidden {
-  display: none;
+.continue-btn.right {
+  right: 25%;
 }
