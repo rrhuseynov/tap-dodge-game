@@ -1,66 +1,73 @@
-/* ===== MENU BUTTONS ===== */
+body {
+  margin: 0;
+  font-family: Arial;
+}
 
+/* screens */
+.screen {
+  display: none;
+  position: fixed;
+  width: 100vw;
+  height: 100vh;
+}
+
+.screen.active {
+  display: block;
+}
+
+.bg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* MENU BUTTONS */
 .menu-buttons {
   position: absolute;
-  top: 40%;
+  top: 45%;
   width: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 18px;
+  gap: 15px;
 }
 
-/* базовая кнопка */
-.btn {
-  width: 280px;
-  height: 70px;
-  border-radius: 35px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  font-size: 22px;
+.menu-buttons button {
+  width: 260px;
+  height: 65px;
+  border-radius: 30px;
+  border: none;
+  font-size: 20px;
   font-weight: bold;
   color: white;
-
-  box-shadow:
-    inset 0 3px 6px rgba(255,255,255,0.4),
-    inset 0 -4px 8px rgba(0,0,0,0.3),
-    0 8px 15px rgba(0,0,0,0.3);
-
-  transition: transform 0.1s, box-shadow 0.1s;
 }
 
-/* при нажатии */
-.btn:active {
-  transform: scale(0.96);
-  box-shadow:
-    inset 0 2px 4px rgba(0,0,0,0.5),
-    0 4px 8px rgba(0,0,0,0.2);
-}
-
-/* ===== КНОПКИ ===== */
-
-/* START (зелёная) */
-.start-btn {
+/* colors */
+.menu-buttons button:nth-child(1) {
   background: linear-gradient(#6eff6a, #2ecc40);
-  box-shadow:
-    0 0 20px rgba(0,255,100,0.6),
-    inset 0 3px 6px rgba(255,255,255,0.5),
-    inset 0 -4px 8px rgba(0,100,0,0.4);
 }
-
-/* SHOP (синяя) */
-.shop-btn {
+.menu-buttons button:nth-child(2) {
   background: linear-gradient(#4da6ff, #1c6cff);
 }
-
-/* APPEARANCE (фиолетовая) */
-.appearance-btn {
+.menu-buttons button:nth-child(3) {
   background: linear-gradient(#7b5cff, #5a3cff);
 }
-
-/* LEADERBOARD (фиолетовая темнее) */
-.leaderboard-btn {
+.menu-buttons button:nth-child(4) {
   background: linear-gradient(#6b4cff, #4a2cff);
+}
+
+/* tap area */
+.tap-area {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+}
+
+/* canvas */
+#gameCanvas {
+  position: absolute;
+  width: 70%;
+  height: 60%;
+  left: 15%;
+  top: 20%;
 }
