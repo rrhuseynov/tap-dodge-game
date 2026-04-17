@@ -3,7 +3,7 @@ body {
   background: black;
 }
 
-/* экран */
+/* fullscreen */
 .screen {
   display: none;
   position: fixed;
@@ -21,39 +21,22 @@ body {
   object-fit: cover;
 }
 
-/* 🔥 ИДЕАЛЬНЫЕ КНОПКИ */
-.click {
+/* кнопки */
+.btn {
   position: absolute;
   left: 50%;
   transform: translateX(-50%);
+  width: 300px;
+  height: 90px;
 }
 
-/* 👇 точные зоны (под твой дизайн) */
-.start {
-  top: 41%;
-  width: 280px;
-  height: 85px;
-}
+/* ТОЧНО ПОД МАКЕТ */
+.start { top: 44%; }
+.shop { top: 54%; }
+.appearance { top: 64%; }
+.leaderboard { top: 74%; }
 
-.shop {
-  top: 51%;
-  width: 280px;
-  height: 85px;
-}
-
-.appearance {
-  top: 61%;
-  width: 280px;
-  height: 85px;
-}
-
-.leaderboard {
-  top: 71%;
-  width: 280px;
-  height: 85px;
-}
-
-/* full tap */
+/* tap full */
 .full {
   position: absolute;
   width: 100%;
@@ -63,7 +46,7 @@ body {
 /* back */
 .back {
   position: absolute;
-  bottom: 5%;
+  bottom: 6%;
   left: 50%;
   transform: translateX(-50%);
   width: 260px;
@@ -73,36 +56,13 @@ body {
 /* canvas */
 #gameCanvas {
   position: absolute;
-  width: 68%;
-  height: 58%;
-  left: 16%;
-  top: 21%;
-  border-radius: 20px;
+  width: 70%;
+  height: 60%;
+  left: 15%;
+  top: 20%;
 }
 
-/* UI */
-.ui {
-  position: absolute;
-  color: white;
-  font-weight: bold;
-}
-
-.score {
-  top: 6%;
-  left: 14%;
-}
-
-.coins {
-  top: 6%;
-  right: 12%;
-}
-
-.lives {
-  top: 12%;
-  left: 14%;
-}
-
-/* continue */
+/* overlay */
 .overlay {
   position: absolute;
   width: 100%;
@@ -114,23 +74,8 @@ body {
   position: absolute;
   width: 80%;
   left: 50%;
-  top: 38%;
+  top: 40%;
   transform: translate(-50%, -50%);
-}
-
-.continue-btn {
-  position: absolute;
-  width: 140px;
-  height: 110px;
-  top: 58%;
-}
-
-.left {
-  left: 18%;
-}
-
-.right {
-  right: 18%;
 }
 
 .hidden {
