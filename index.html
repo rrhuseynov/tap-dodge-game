@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Tap Dodge</title>
+<title>Tap Dodge Cyber</title>
 
 <style>
 html, body{
@@ -13,19 +13,33 @@ html, body{
  font-family:Arial;
 }
 
-/* REAL IMAGE BACKGROUND */
+/* CYBERPUNK BACKGROUND */
 body{
- background-image: url("https://images.unsplash.com/photo-1517816428104-797678c7cf0e?q=80&w=1600");
+ background: url("https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=1600") no-repeat center;
  background-size: cover;
- background-position: center;
 }
 
-/* DARK OVERLAY */
+/* GRADIENT OVERLAY */
 #overlay{
  position:absolute;
  width:100%;
  height:100%;
- background:rgba(0,0,0,0.6);
+ background:linear-gradient(180deg,rgba(0,0,0,0.7),rgba(2,6,23,0.9));
+}
+
+/* LIGHT GLOW */
+.glow{
+ position:absolute;
+ width:300px;
+ height:300px;
+ background:radial-gradient(circle, rgba(34,197,94,0.3), transparent);
+ border-radius:50%;
+ animation:move 10s infinite alternate;
+}
+
+@keyframes move{
+ from{transform:translate(-50px,-50px);}
+ to{transform:translate(50px,50px);}
 }
 
 /* MENU */
@@ -37,29 +51,48 @@ body{
  flex-direction:column;
  justify-content:center;
  align-items:center;
- color:#fff;
  z-index:2;
 }
 
+/* GLASS PANEL */
+.panel{
+ padding:30px;
+ border-radius:20px;
+ background:rgba(255,255,255,0.05);
+ backdrop-filter:blur(15px);
+ border:1px solid rgba(255,255,255,0.1);
+ text-align:center;
+}
+
+/* TITLE */
 .title{
  font-size:40px;
  color:#22c55e;
- text-shadow:0 0 20px #22c55e;
- margin-bottom:30px;
+ text-shadow:0 0 25px #22c55e;
+ margin-bottom:20px;
 }
 
+/* BUTTONS */
 .btn{
- width:220px;
- padding:15px;
+ width:200px;
+ padding:14px;
  margin:10px;
  font-size:18px;
  border:none;
  border-radius:12px;
+ background:rgba(34,197,94,0.2);
+ color:#22c55e;
+ border:1px solid #22c55e;
+ transition:0.2s;
+}
+
+.btn:active{
+ transform:scale(0.95);
  background:#22c55e;
  color:#000;
 }
 
-/* GAME UI */
+/* TOP UI */
 #top{
  position:absolute;
  top:0;
@@ -82,10 +115,15 @@ canvas{
 <body>
 
 <div id="overlay"></div>
+<div class="glow" style="top:20%; left:30%;"></div>
+<div class="glow" style="top:60%; left:70%;"></div>
 
 <div id="menu">
- <div class="title">TAP DODGE</div>
- <button class="btn" onclick="startGame()">NEW GAME</button>
+ <div class="panel">
+  <div class="title">TAP DODGE</div>
+  <button class="btn" onclick="startGame()">NEW GAME</button>
+  <button class="btn" onclick="startCrazy()">CRAZY MODE</button>
+ </div>
 </div>
 
 <div id="top">
@@ -106,9 +144,10 @@ function resize(){
 resize();
 window.addEventListener("resize", resize);
 
-// GAME
-let player, obstacles=[], score=0, best=0, speed=4, playing=false;
+// GAME STATE
+let player, obstacles, score, best, speed, playing;
 
+// PLAYER
 class Player{
  constructor(){
   this.x = canvas.width/2;
@@ -121,10 +160,15 @@ class Player{
  }
 
  draw(){
+  ctx.shadowBlur=20;
+  ctx.shadowColor="#22c55e";
+
   ctx.fillStyle="#22c55e";
   ctx.beginPath();
   ctx.arc(this.x,this.y,10,0,Math.PI*2);
   ctx.fill();
+
+  ctx.shadowBlur=0;
  }
 
  move(){
@@ -134,6 +178,7 @@ class Player{
  }
 }
 
+// OBSTACLE
 class Obstacle{
  constructor(){
   this.gap=120;
@@ -144,27 +189,40 @@ class Obstacle{
  update(){ this.y+=speed; }
 
  draw(){
-  ctx.fillStyle="#ef4444";
+  ctx.fillStyle="#ff0055";
   ctx.fillRect(0,this.y,this.x,20);
   ctx.fillRect(this.x+this.gap,this.y,canvas.width-(this.x+this.gap),20);
  }
 }
 
-function startGame(){
- player = new Player();
- obstacles = [];
- score = 0;
- speed = 4;
- playing = true;
+// INIT
+function init(){
+ player=new Player();
+ obstacles=[];
+ score=0;
+ speed=4;
+ best=localStorage.getItem("best")||0;
+ playing=true;
 
- best = localStorage.getItem("best") || 0;
-
- document.getElementById("menu").style.display="none";
- document.getElementById("top").style.display="flex";
  document.getElementById("score").innerText=score;
  document.getElementById("best").innerText=best;
 }
 
+// START
+function startGame(){
+ init();
+ document.getElementById("menu").style.display="none";
+ document.getElementById("top").style.display="flex";
+}
+
+function startCrazy(){
+ init();
+ speed=7;
+ document.getElementById("menu").style.display="none";
+ document.getElementById("top").style.display="flex";
+}
+
+// GAME OVER
 function gameOver(){
  playing=false;
 
@@ -177,6 +235,7 @@ function gameOver(){
  document.getElementById("top").style.display="none";
 }
 
+// LOOP
 function loop(){
  ctx.clearRect(0,0,canvas.width,canvas.height);
 
@@ -207,10 +266,12 @@ function loop(){
  requestAnimationFrame(loop);
 }
 
+// SPAWN
 setInterval(()=>{
  if(playing) obstacles.push(new Obstacle());
 },1000);
 
+// INPUT
 canvas.addEventListener("touchstart",()=>player?.move());
 canvas.addEventListener("mousedown",()=>player?.move());
 
