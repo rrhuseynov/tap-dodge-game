@@ -13,11 +13,8 @@ html,body{margin:0;padding:0;overflow:hidden;font-family:Arial;}
  width:100%;
  height:100%;
  background:url("bg.png") center/cover no-repeat;
- transition:0.3s;
 }
-#bg.blur{filter:blur(6px) brightness(0.6);}
 
-/* MENU */
 #menu{
  position:absolute;
  width:100%;
@@ -34,6 +31,7 @@ html,body{margin:0;padding:0;overflow:hidden;font-family:Arial;}
  border-radius:20px;
  text-align:center;
  width:260px;
+ color:white;
 }
 
 .btn{
@@ -42,18 +40,22 @@ html,body{margin:0;padding:0;overflow:hidden;font-family:Arial;}
  margin:6px;
  border-radius:30px;
  border:none;
+ background:#f59e0b;
 }
-.main{background:#f59e0b;}
-.secondary{
- border:2px solid #f59e0b;
- background:transparent;
- color:#f59e0b;
+
+/* HUD */
+#hud{
+ position:absolute;
+ top:10px;
+ left:10px;
+ color:white;
+ font-size:14px;
 }
 
 /* MISSIONS */
 #missions{
  position:absolute;
- top:10px;
+ top:40px;
  left:10px;
  color:white;
  font-size:12px;
@@ -69,8 +71,14 @@ canvas{position:absolute;}
 
 <div id="menu">
  <div class="card">
-  <button class="btn main" onclick="startGame()">NEW GAME</button>
+  <h2>TAP & DODGE</h2>
+  <button class="btn" onclick="startGame()">NEW GAME</button>
+  <div>💎 Coins: <span id="coins">0</span></div>
  </div>
+</div>
+
+<div id="hud">
+ 💎 <span id="coinsHud">0</span>
 </div>
 
 <div id="missions"></div>
@@ -88,16 +96,18 @@ function resize(){
 resize();
 window.addEventListener("resize",resize);
 
+// GAME
 let player,obstacles,score,speed,playing,time;
+let coins=parseInt(localStorage.getItem("coins")||0);
 
 // MISSIONS
 let missions=[];
 
 function generateMissions(){
  missions=[
-  {text:"Score 10",type:"score",goal:10,done:false},
-  {text:"Survive 20s",type:"time",goal:1200,done:false},
-  {text:"Reach speed 6",type:"speed",goal:6,done:false}
+  {text:"Score 10",type:"score",goal:10,reward:5,done:false},
+  {text:"Survive 15s",type:"time",goal:900,reward:7,done:false},
+  {text:"Speed 6",type:"speed",goal:6,reward:10,done:false}
  ];
 }
 
@@ -105,21 +115,35 @@ function updateMissions(){
  missions.forEach(m=>{
   if(m.done)return;
 
-  if(m.type==="score" && score>=m.goal) m.done=true;
-  if(m.type==="time" && time>=m.goal) m.done=true;
-  if(m.type==="speed" && speed>=m.goal) m.done=true;
+  if(m.type==="score" && score>=m.goal) completeMission(m);
+  if(m.type==="time" && time>=m.goal) completeMission(m);
+  if(m.type==="speed" && speed>=m.goal) completeMission(m);
  });
 
  renderMissions();
+}
+
+function completeMission(m){
+ m.done=true;
+ coins+=m.reward;
+ saveCoins();
 }
 
 function renderMissions(){
  document.getElementById("missions").innerHTML=
   missions.map(m=>`
    <div style="color:${m.done?'#22c55e':'#fff'}">
-   ${m.done?'✔ ':'• '}${m.text}
+   ${m.done?'✔ ':'• '} ${m.text} (+${m.reward})
    </div>
   `).join("");
+
+ document.getElementById("coinsHud").innerText=coins;
+ document.getElementById("coins").innerText=coins;
+}
+
+// SAVE
+function saveCoins(){
+ localStorage.setItem("coins",coins);
 }
 
 // PLAYER
@@ -154,11 +178,7 @@ class Obstacle{
  }
  update(){this.y+=speed;}
  draw(){
-  let g=ctx.createLinearGradient(0,this.y,0,this.y+20);
-  g.addColorStop(0,"#ff7a00");
-  g.addColorStop(1,"#ff0055");
-
-  ctx.fillStyle=g;
+  ctx.fillStyle="#ff0055";
   ctx.fillRect(0,this.y,this.x,20);
   ctx.fillRect(this.x+this.gap,this.y,
    canvas.width-(this.x+this.gap),20);
@@ -177,7 +197,6 @@ function startGame(){
  generateMissions();
 
  document.getElementById("menu").style.display="none";
- document.getElementById("bg").classList.add("blur");
 }
 
 // LOOP
@@ -200,7 +219,6 @@ function loop(){
     if(player.x<o.x || player.x>o.x+o.gap){
      playing=false;
      document.getElementById("menu").style.display="flex";
-     document.getElementById("bg").classList.remove("blur");
     }
    }
 
@@ -219,7 +237,7 @@ function loop(){
 
 // SPAWN
 setInterval(()=>{
- if(playing)obstacles.push(new Obstacle());
+ if(playing) obstacles.push(new Obstacle());
 },900);
 
 // INPUT
