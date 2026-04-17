@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Tap Dodge Final</title>
+<title>Tap Dodge Pro</title>
 
 <style>
 html, body{
@@ -13,48 +13,33 @@ html, body{
  font-family:Arial;
 }
 
-/* 🎮 REAL BACKGROUND */
+/* BACKGROUND */
 body{
  background:url("https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=1600") no-repeat center;
  background-size:cover;
 }
 
-/* 🌫 OVERLAY */
 #overlay{
  position:absolute;
  width:100%;
  height:100%;
  background:rgba(0,0,0,0.5);
- z-index:0;
 }
 
-/* ✨ LIGHT GLOW */
-#glow{
- position:absolute;
- width:300px;
- height:300px;
- border-radius:50%;
- background:radial-gradient(circle, rgba(34,197,94,0.3), transparent);
- top:30%;
- left:40%;
- filter:blur(40px);
-}
-
-/* 🎮 MENU */
+/* MENU */
 #menu{
  position:absolute;
  width:100%;
  height:100%;
  display:flex;
- flex-direction:column;
  justify-content:center;
  align-items:center;
+ flex-direction:column;
  color:white;
- z-index:2;
 }
 
 .title{
- font-size:42px;
+ font-size:40px;
  color:#22c55e;
  text-shadow:0 0 20px #22c55e;
 }
@@ -62,13 +47,18 @@ body{
 .btn{
  margin-top:20px;
  padding:15px 30px;
- background:#22c55e;
  border:none;
  border-radius:12px;
+ background:#22c55e;
  font-size:18px;
+ transition:0.2s;
 }
 
-/* TOP UI */
+.btn:active{
+ transform:scale(0.9);
+}
+
+/* UI */
 #top{
  position:absolute;
  top:0;
@@ -78,16 +68,19 @@ body{
  padding:10px;
  color:white;
  display:none;
- z-index:3;
 }
 
-/* CANVAS */
+#flash{
+ position:absolute;
+ width:100%;
+ height:100%;
+ background:white;
+ opacity:0;
+ pointer-events:none;
+}
+
 canvas{
  position:absolute;
- top:0;
- left:0;
- z-index:1;
- background:transparent; /* ВАЖНО */
 }
 </style>
 </head>
@@ -95,7 +88,6 @@ canvas{
 <body>
 
 <div id="overlay"></div>
-<div id="glow"></div>
 
 <div id="menu">
  <div class="title">TAP DODGE</div>
@@ -106,6 +98,8 @@ canvas{
  <div>Score: <span id="score">0</span></div>
  <div>Best: <span id="best">0</span></div>
 </div>
+
+<div id="flash"></div>
 
 <canvas id="game"></canvas>
 
@@ -120,8 +114,20 @@ function resize(){
 resize();
 window.addEventListener("resize", resize);
 
+// SOUND
+let audioCtx = new (window.AudioContext||window.webkitAudioContext)();
+
+function beep(f){
+ let o = audioCtx.createOscillator();
+ let g = audioCtx.createGain();
+ o.connect(g); g.connect(audioCtx.destination);
+ o.frequency.value = f;
+ o.start();
+ g.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime+0.2);
+}
+
 // GAME
-let player, obstacles=[], score=0, best=0, speed=4, playing=false;
+let player, obstacles=[], particles=[], score=0, best=0, speed=4, playing=false;
 
 class Player{
  constructor(){
@@ -169,9 +175,39 @@ class Obstacle{
  }
 }
 
+function explode(){
+ for(let i=0;i<20;i++){
+  particles.push({
+   x:player.x,
+   y:player.y,
+   dx:(Math.random()-0.5)*8,
+   dy:(Math.random()-0.5)*8,
+   life:30
+  });
+ }
+}
+
+function drawParticles(){
+ ctx.fillStyle="#fff";
+ particles.forEach(p=>{
+  ctx.fillRect(p.x,p.y,2,2);
+  p.x+=p.dx;
+  p.y+=p.dy;
+  p.life--;
+ });
+ particles=particles.filter(p=>p.life>0);
+}
+
+function flash(){
+ let f=document.getElementById("flash");
+ f.style.opacity=0.8;
+ setTimeout(()=>f.style.opacity=0,100);
+}
+
 function startGame(){
  player = new Player();
  obstacles = [];
+ particles=[];
  score = 0;
  speed = 4;
  playing = true;
@@ -186,6 +222,10 @@ function startGame(){
 
 function gameOver(){
  playing=false;
+ beep(120);
+ navigator.vibrate?.(100);
+ explode();
+ flash();
 
  if(score>best){
   best=score;
@@ -197,7 +237,6 @@ function gameOver(){
 }
 
 function loop(){
- // ❗ ВАЖНО: только clear, без fillRect
  ctx.clearRect(0,0,canvas.width,canvas.height);
 
  if(playing){
@@ -217,6 +256,7 @@ function loop(){
    if(o.y>canvas.height){
     score++;
     speed+=0.1;
+    beep(400);
     document.getElementById("score").innerText=score;
    }
   });
@@ -224,12 +264,13 @@ function loop(){
   obstacles = obstacles.filter(o=>o.y<canvas.height);
  }
 
+ drawParticles();
  requestAnimationFrame(loop);
 }
 
 setInterval(()=>{
  if(playing) obstacles.push(new Obstacle());
-},1000);
+},900);
 
 canvas.addEventListener("touchstart",()=>player?.move());
 canvas.addEventListener("mousedown",()=>player?.move());
