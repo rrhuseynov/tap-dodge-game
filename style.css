@@ -3,7 +3,6 @@ body {
   background: black;
 }
 
-/* fullscreen */
 .screen {
   display: none;
   position: fixed;
@@ -21,63 +20,10 @@ body {
   object-fit: cover;
 }
 
-/* кнопки */
-.btn {
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 300px;
-  height: 90px;
-}
-
-/* ТОЧНО ПОД МАКЕТ */
-.start { top: 44%; }
-.shop { top: 54%; }
-.appearance { top: 64%; }
-.leaderboard { top: 74%; }
-
-/* tap full */
-.full {
-  position: absolute;
-  width: 100%;
-  height: 100%;
-}
-
-/* back */
-.back {
-  position: absolute;
-  bottom: 6%;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 260px;
-  height: 100px;
-}
-
-/* canvas */
 #gameCanvas {
   position: absolute;
   width: 70%;
   height: 60%;
   left: 15%;
   top: 20%;
-}
-
-/* overlay */
-.overlay {
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  background: rgba(0,0,0,0.5);
-}
-
-.popup {
-  position: absolute;
-  width: 80%;
-  left: 50%;
-  top: 40%;
-  transform: translate(-50%, -50%);
-}
-
-.hidden {
-  display: none;
 }
