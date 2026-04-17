@@ -1,15 +1,12 @@
-/* screen switch */
 function show(id) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
 }
 
-/* welcome -> menu */
 window.onload = () => {
-  setTimeout(() => show('menu'), 1500);
+  setTimeout(() => show('menu'), 1200);
 };
 
-/* buttons */
 function goGameStart() {
   show('game_start');
 }
@@ -19,7 +16,7 @@ function startGameNow() {
   startGame();
 }
 
-/* ===== GAME ===== */
+/* GAME */
 
 let canvas = document.getElementById('gameCanvas');
 let ctx = canvas.getContext('2d');
