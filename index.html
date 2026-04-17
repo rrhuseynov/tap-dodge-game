@@ -3,10 +3,8 @@
 <head>
   <meta charset="UTF-8">
 
-  <!-- iOS fullscreen -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
   <title>Tap Dodge</title>
   <link rel="stylesheet" href="style.css">
@@ -19,42 +17,28 @@
 </div>
 
 <div id="menu" class="screen">
-  <img src="assets/main_menu.png" class="bg">
-
-  <div class="btn start" onclick="goStart()"></div>
-  <div class="btn shop" onclick="show('shop')"></div>
-  <div class="btn appearance" onclick="show('appearance_ball')"></div>
-  <div class="btn leaderboard" onclick="show('leaderboard')"></div>
+  <img src="assets/main_menu.png" class="bg" onclick="menuClick(event)">
 </div>
 
 <div id="game_start" class="screen">
-  <img src="assets/game_start.png" class="bg">
-  <div class="full" onclick="startFromTap()"></div>
+  <img src="assets/game_start.png" class="bg" onclick="startFromTap()">
 </div>
 
 <div id="game" class="screen">
   <img src="assets/game.png" class="bg">
-
   <canvas id="gameCanvas"></canvas>
-
-  <div id="continueBox" class="overlay hidden">
-    <img src="assets/continue.png" class="popup">
-  </div>
 </div>
 
 <div id="shop" class="screen">
-  <img src="assets/shop.png" class="bg">
-  <div class="back" onclick="show('menu')"></div>
+  <img src="assets/shop.png" class="bg" onclick="backMenu()">
 </div>
 
 <div id="appearance_ball" class="screen">
-  <img src="assets/appearance-ball.png" class="bg">
-  <div class="back" onclick="show('menu')"></div>
+  <img src="assets/appearance-ball.png" class="bg" onclick="backMenu()">
 </div>
 
 <div id="leaderboard" class="screen">
-  <img src="assets/leaderboard.png" class="bg">
-  <div class="back" onclick="show('menu')"></div>
+  <img src="assets/leaderboard.png" class="bg" onclick="backMenu()">
 </div>
 
 <script src="game.js"></script>
