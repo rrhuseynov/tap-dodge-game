@@ -3,40 +3,30 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<meta name="apple-mobile-web-app-capable" content="yes">
 <title>Tap Dodge</title>
 <link rel="stylesheet" href="./style.css">
 </head>
 
 <body>
 
-<!-- WELCOME -->
 <div id="welcome" class="screen active">
   <img src="assets/welcome.png" class="bg">
 </div>
 
-<!-- MENU -->
 <div id="menu" class="screen">
   <img src="assets/main_menu.PNG" class="bg">
 
   <div class="menu-buttons">
     <button onclick="show('game')">START</button>
     <button onclick="show('shop')">SHOP</button>
-    <button onclick="show('appearance_ball')">APPEARANCE</button>
-    <button onclick="show('leaderboard')">LEADERBOARD</button>
   </div>
 </div>
 
-<!-- SHOP -->
 <div id="shop" class="screen">
   <img src="assets/shop.PNG" class="bg">
-
   <div class="shop-container" id="shopItems"></div>
-
-  <img src="assets/back.png" class="back-btn" onclick="show('menu')">
 </div>
 
-<!-- GAME -->
 <div id="game" class="screen">
   <img src="assets/game_start.png" class="bg">
   <canvas id="gameCanvas"></canvas>
