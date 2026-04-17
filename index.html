@@ -13,21 +13,22 @@ html, body{
  font-family:Arial;
 }
 
-/* 📷 IMAGE BACKGROUND */
+/* 📷 PNG ФОН */
 #bg{
  position:absolute;
  width:100%;
  height:100%;
- background:url("https://images.unsplash.com/photo-1504384308090-c894fdcc538d?q=80&w=1600") center/cover no-repeat;
+ background:url("bg.png") center/cover no-repeat;
+ z-index:0;
 }
 
-/* 🌫 BLUR + DARK */
+/* 🌫 затемнение */
 #overlay{
  position:absolute;
  width:100%;
  height:100%;
- backdrop-filter:blur(6px);
  background:rgba(0,0,0,0.4);
+ z-index:1;
 }
 
 /* MENU */
@@ -73,7 +74,8 @@ html, body{
 
 canvas{
  position:absolute;
- z-index:1;
+ z-index:2;
+ background:transparent;
 }
 </style>
 </head>
@@ -163,7 +165,7 @@ function startGame(){
 
  best = localStorage.getItem("best") || 0;
 
- // 👉 убираем blur во время игры
+ // убираем затемнение во время игры
  document.getElementById("overlay").style.display="none";
 
  document.getElementById("menu").style.display="none";
