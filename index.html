@@ -44,35 +44,43 @@ html, body{
  padding:30px;
  border-radius:20px;
  text-align:center;
- box-shadow:0 0 30px rgba(255,165,0,0.2);
  width:260px;
 }
 
-.card h1{color:#fff;}
-
-.subtitle{
- color:#f59e0b;
- margin-bottom:20px;
-}
-
-/* BUTTONS */
 .btn{
  width:200px;
  padding:14px;
  margin:8px 0;
  border:none;
  border-radius:30px;
- font-size:15px;
+ background:#f59e0b;
 }
 
-.main{background:#f59e0b;color:#000;}
-.secondary{
- background:transparent;
- border:2px solid #f59e0b;
- color:#f59e0b;
+/* GAME OVER */
+#gameOver{
+ position:absolute;
+ width:100%;
+ height:100%;
+ display:flex;
+ flex-direction:column;
+ justify-content:center;
+ align-items:center;
+ color:white;
+ z-index:4;
+ display:none;
 }
 
-/* UI */
+#gameOver h1{
+ font-size:50px;
+ color:#ff4444;
+}
+
+.tap{
+ margin-top:10px;
+ color:#ccc;
+}
+
+/* TOP */
 #top{
  position:absolute;
  top:0;
@@ -88,7 +96,6 @@ html, body{
 canvas{
  position:absolute;
  z-index:2;
- background:transparent;
 }
 </style>
 </head>
@@ -100,14 +107,15 @@ canvas{
 
 <!-- MENU -->
 <div id="menu">
-  <div class="card">
-    <h1>TAP & DODGE</h1>
-    <p class="subtitle">Survive as long as you can</p>
+ <div class="card">
+  <button class="btn" onclick="newGame()">NEW GAME</button>
+ </div>
+</div>
 
-    <button class="btn main" onclick="newGame()">NEW GAME</button>
-    <button class="btn secondary" onclick="continueGame()">CONTINUE</button>
-    <button class="btn secondary">🏆 Leaderboard</button>
-  </div>
+<!-- GAME OVER -->
+<div id="gameOver">
+ <h1>GAME OVER</h1>
+ <div class="tap">Tap to restart</div>
 </div>
 
 <!-- TOP -->
@@ -122,8 +130,6 @@ canvas{
 const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
 
-canvas.style.pointerEvents = "none";
-
 function resize(){
  canvas.width = innerWidth;
  canvas.height = innerHeight;
@@ -131,7 +137,9 @@ function resize(){
 resize();
 window.addEventListener("resize", resize);
 
-let player, obstacles=[], score=0, best=0, speed=4, playing=false;
+let player, obstacles=[], score=0, best=0, speed=4;
+let playing=false;
+let gameOverState=false;
 
 // PLAYER
 class Player{
@@ -146,15 +154,10 @@ class Player{
  }
 
  draw(){
-  ctx.shadowBlur=20;
-  ctx.shadowColor="#22c55e";
-
   ctx.fillStyle="#22c55e";
   ctx.beginPath();
   ctx.arc(this.x,this.y,12,0,Math.PI*2);
   ctx.fill();
-
-  ctx.shadowBlur=0;
  }
 
  move(){
@@ -164,7 +167,7 @@ class Player{
  }
 }
 
-// OBSTACLE (красивые)
+// OBSTACLE
 class Obstacle{
  constructor(){
   this.gap=130;
@@ -181,98 +184,39 @@ class Obstacle{
   g.addColorStop(0,"#ff7a00");
   g.addColorStop(1,"#ff0055");
 
-  ctx.shadowBlur=25;
-  ctx.shadowColor="#ff0055";
   ctx.fillStyle=g;
-
-  ctx.beginPath();
-  ctx.roundRect(0,this.y,this.x,h,10);
-  ctx.fill();
-
-  ctx.beginPath();
-  ctx.roundRect(this.x+this.gap,this.y,
-   canvas.width-(this.x+this.gap),h,10);
-  ctx.fill();
-
-  ctx.shadowBlur=0;
+  ctx.fillRect(0,this.y,this.x,h);
+  ctx.fillRect(this.x+this.gap,this.y,
+   canvas.width-(this.x+this.gap),h);
  }
 }
 
-// NEW GAME
 function newGame(){
- player = new Player();
- obstacles = [];
- score = 0;
- speed = 4;
- playing = true;
+ player=new Player();
+ obstacles=[];
+ score=0;
+ speed=4;
+ playing=true;
+ gameOverState=false;
 
- localStorage.removeItem("save");
-
- start();
-}
-
-// CONTINUE
-function continueGame(){
- let save = JSON.parse(localStorage.getItem("save"));
-
- if(!save) return;
-
- player = new Player();
- player.x = save.x;
- player.targetX = save.x;
-
- obstacles = save.obstacles || [];
- score = save.score;
- speed = save.speed;
- playing = true;
-
- start();
-}
-
-// START COMMON
-function start(){
- canvas.style.pointerEvents="auto";
-
- best = localStorage.getItem("best") || 0;
-
- document.getElementById("overlay").style.display="none";
  document.getElementById("menu").style.display="none";
+ document.getElementById("overlay").style.display="none";
  document.getElementById("top").style.display="flex";
-
- document.getElementById("score").innerText=score;
- document.getElementById("best").innerText=best;
+ document.getElementById("gameOver").style.display="none";
 }
 
-// GAME OVER
-function gameOver(){
+function triggerGameOver(){
  playing=false;
+ gameOverState=true;
 
- canvas.style.pointerEvents="none";
-
- document.getElementById("overlay").style.display="block";
+ document.getElementById("gameOver").style.display="flex";
 
  if(score>best){
   best=score;
   localStorage.setItem("best",best);
  }
-
- document.getElementById("menu").style.display="flex";
- document.getElementById("top").style.display="none";
 }
 
-// SAVE
-function saveGame(){
- if(!playing) return;
-
- localStorage.setItem("save",JSON.stringify({
-  x:player.x,
-  obstacles:obstacles,
-  score:score,
-  speed:speed
- }));
-}
-
-// LOOP
 function loop(){
  ctx.clearRect(0,0,canvas.width,canvas.height);
 
@@ -286,7 +230,7 @@ function loop(){
 
    if(player.y<o.y+20 && player.y>o.y){
     if(player.x<o.x || player.x>o.x+o.gap){
-     gameOver();
+     triggerGameOver();
     }
    }
 
@@ -298,21 +242,26 @@ function loop(){
   });
 
   obstacles = obstacles.filter(o=>o.y<canvas.height);
-
-  saveGame();
  }
 
  requestAnimationFrame(loop);
 }
 
-// SPAWN
 setInterval(()=>{
  if(playing) obstacles.push(new Obstacle());
 },900);
 
 // INPUT
-canvas.addEventListener("mousedown",()=>player?.move());
-canvas.addEventListener("touchstart",()=>player?.move());
+canvas.addEventListener("mousedown",handleInput);
+canvas.addEventListener("touchstart",handleInput);
+
+function handleInput(){
+ if(gameOverState){
+  newGame();
+ }else if(playing){
+  player.move();
+ }
+}
 
 loop();
 </script>
