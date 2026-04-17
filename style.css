@@ -21,7 +21,7 @@ body {
   object-fit: cover;
 }
 
-/* MENU BUTTONS */
+/* MENU */
 .menu-buttons {
   position: absolute;
   top: 45%;
@@ -42,7 +42,7 @@ body {
   color: white;
 }
 
-/* colors */
+/* COLORS */
 .menu-buttons button:nth-child(1) {
   background: linear-gradient(#6eff6a, #2ecc40);
 }
@@ -56,14 +56,14 @@ body {
   background: linear-gradient(#6b4cff, #4a2cff);
 }
 
-/* tap area */
+/* tap */
 .tap-area {
   position: absolute;
   width: 100%;
   height: 100%;
 }
 
-/* canvas */
+/* game */
 #gameCanvas {
   position: absolute;
   width: 70%;
