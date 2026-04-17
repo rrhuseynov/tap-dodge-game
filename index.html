@@ -1,7 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+
+  <!-- 📱 iPhone fullscreen -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+  <title>Tap Dodge</title>
+
+  <!-- ✅ CSS ПОДКЛЮЧЕНИЕ -->
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<!-- WELCOME -->
+<div id="welcome" class="screen active">
+  <img src="assets/welcome.png" class="bg">
+</div>
+
+<!-- MENU -->
+<div id="menu" class="screen">
+  <img src="assets/main_menu.png" class="bg" onclick="menuClick(event)">
+</div>
+
+<!-- GAME START -->
+<div id="game_start" class="screen">
+  <img src="assets/game_start.png" class="bg" onclick="startFromTap()">
+</div>
+
+<!-- GAME -->
 <div id="game" class="screen">
   <img src="assets/game_start.png" class="bg">
 
-  <!-- UI -->
+  <!-- 🔥 UI -->
   <div class="top-ui">
 
     <div class="score-box">
@@ -23,14 +57,35 @@
 
   </div>
 
-  <!-- hearts -->
+  <!-- ❤️ hearts -->
   <div id="livesText" class="hearts">❤️❤️❤️</div>
 
-  <!-- coins -->
+  <!-- 💰 coins -->
   <div class="coins">
     🪙 <span id="coinText">120</span>
   </div>
 
-  <!-- game -->
+  <!-- 🎮 game -->
   <canvas id="gameCanvas"></canvas>
 </div>
+
+<!-- SHOP -->
+<div id="shop" class="screen">
+  <img src="assets/shop.png" class="bg" onclick="backMenu()">
+</div>
+
+<!-- APPEARANCE -->
+<div id="appearance_ball" class="screen">
+  <img src="assets/appearance-ball.png" class="bg" onclick="backMenu()">
+</div>
+
+<!-- LEADERBOARD -->
+<div id="leaderboard" class="screen">
+  <img src="assets/leaderboard.png" class="bg" onclick="backMenu()">
+</div>
+
+<!-- ✅ JS -->
+<script src="game.js"></script>
+
+</body>
+</html>
