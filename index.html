@@ -21,7 +21,6 @@ html, body{
  background:url("bg.png") center/cover no-repeat;
 }
 
-/* DARK OVERLAY */
 #overlay{
  position:absolute;
  width:100%;
@@ -37,10 +36,9 @@ html, body{
  display:flex;
  justify-content:center;
  align-items:center;
- z-index:2;
+ z-index:3;
 }
 
-/* CARD */
 .card{
  background:#0b0b0b;
  padding:30px;
@@ -50,20 +48,15 @@ html, body{
  width:260px;
 }
 
-/* TITLE */
 .card h1{
  color:#fff;
- margin-bottom:10px;
 }
 
-/* SUBTITLE */
 .subtitle{
  color:#f59e0b;
- font-size:14px;
  margin-bottom:20px;
 }
 
-/* MAIN BUTTON */
 .main-btn{
  width:200px;
  padding:15px;
@@ -71,12 +64,9 @@ html, body{
  border:none;
  border-radius:30px;
  background:#f59e0b;
- color:#000;
  font-weight:bold;
- font-size:16px;
 }
 
-/* SECOND BUTTON */
 .secondary-btn{
  width:200px;
  padding:12px;
@@ -84,10 +74,9 @@ html, body{
  border-radius:30px;
  background:transparent;
  color:#f59e0b;
- font-size:14px;
 }
 
-/* TOP UI */
+/* UI */
 #top{
  position:absolute;
  top:0;
@@ -97,13 +86,12 @@ html, body{
  padding:10px;
  color:white;
  display:none;
- z-index:3;
+ z-index:4;
 }
 
-/* CANVAS */
 canvas{
  position:absolute;
- z-index:1;
+ z-index:2;
  background:transparent;
 }
 </style>
@@ -114,7 +102,6 @@ canvas{
 <div id="bg"></div>
 <div id="overlay"></div>
 
-<!-- MENU -->
 <div id="menu">
   <div class="card">
     <h1>TAP & DODGE</h1>
@@ -130,7 +117,6 @@ canvas{
   </div>
 </div>
 
-<!-- TOP -->
 <div id="top">
  <div>Score: <span id="score">0</span></div>
  <div>Best: <span id="best">0</span></div>
@@ -142,6 +128,9 @@ canvas{
 const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
 
+// ❗ фикс кликов
+canvas.style.pointerEvents = "none";
+
 function resize(){
  canvas.width = innerWidth;
  canvas.height = innerHeight;
@@ -149,7 +138,6 @@ function resize(){
 resize();
 window.addEventListener("resize", resize);
 
-// GAME
 let player, obstacles=[], score=0, best=0, speed=4, playing=false;
 
 // PLAYER
@@ -170,7 +158,7 @@ class Player{
 
   ctx.fillStyle="#22c55e";
   ctx.beginPath();
-  ctx.arc(this.x,this.y,10,0,Math.PI*2);
+  ctx.arc(this.x,this.y,12,0,Math.PI*2);
   ctx.fill();
 
   ctx.shadowBlur=0;
@@ -183,10 +171,10 @@ class Player{
  }
 }
 
-// OBSTACLE
+// 🔥 КРАСИВЫЕ ПРЕПЯТСТВИЯ
 class Obstacle{
  constructor(){
-  this.gap=120;
+  this.gap=130;
   this.x=Math.random()*(canvas.width-this.gap);
   this.y=-30;
  }
@@ -194,13 +182,32 @@ class Obstacle{
  update(){ this.y+=speed; }
 
  draw(){
-  ctx.fillStyle="#ff0044";
-  ctx.fillRect(0,this.y,this.x,20);
-  ctx.fillRect(this.x+this.gap,this.y,canvas.width-(this.x+this.gap),20);
+  let h = 20;
+
+  // градиент
+  let g = ctx.createLinearGradient(0,this.y,0,this.y+h);
+  g.addColorStop(0,"#ff7a00");
+  g.addColorStop(1,"#ff0055");
+
+  ctx.shadowBlur = 25;
+  ctx.shadowColor = "#ff0055";
+  ctx.fillStyle = g;
+
+  // левая
+  ctx.beginPath();
+  ctx.roundRect(0,this.y,this.x,h,10);
+  ctx.fill();
+
+  // правая
+  ctx.beginPath();
+  ctx.roundRect(this.x+this.gap,this.y,
+   canvas.width-(this.x+this.gap),h,10);
+  ctx.fill();
+
+  ctx.shadowBlur = 0;
  }
 }
 
-// START
 function startGame(){
  player = new Player();
  obstacles = [];
@@ -210,14 +217,19 @@ function startGame(){
 
  best = localStorage.getItem("best") || 0;
 
+ // включаем клики
+ canvas.style.pointerEvents = "auto";
+
  document.getElementById("overlay").style.display="none";
  document.getElementById("menu").style.display="none";
  document.getElementById("top").style.display="flex";
 }
 
-// GAME OVER
 function gameOver(){
  playing=false;
+
+ // выключаем клики
+ canvas.style.pointerEvents = "none";
 
  document.getElementById("overlay").style.display="block";
 
@@ -230,7 +242,6 @@ function gameOver(){
  document.getElementById("top").style.display="none";
 }
 
-// LOOP
 function loop(){
  ctx.clearRect(0,0,canvas.width,canvas.height);
 
@@ -261,12 +272,10 @@ function loop(){
  requestAnimationFrame(loop);
 }
 
-// SPAWN
 setInterval(()=>{
  if(playing) obstacles.push(new Obstacle());
-},1000);
+},900);
 
-// INPUT
 canvas.addEventListener("mousedown",()=>player?.move());
 canvas.addEventListener("touchstart",()=>player?.move());
 
