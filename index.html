@@ -6,162 +6,140 @@
 <title>Tap & Dodge</title>
 
 <style>
-html,body{margin:0;padding:0;overflow:hidden;font-family:Arial;}
-
-#bg{
- position:absolute;
- width:100%;
- height:100%;
- background:url("bg.png") center/cover no-repeat;
+html,body{
+ margin:0;
+ padding:0;
+ background:#000;
+ font-family:Arial;
+ display:flex;
+ justify-content:center;
+ align-items:center;
+ height:100vh;
+ color:white;
 }
 
-#menu{
+/* MAIN LAYOUT */
+#wrapper{
+ display:flex;
+ align-items:center;
+ gap:20px;
+}
+
+/* SIDE PANELS */
+.panel{
+ background:#111;
+ padding:15px;
+ border-radius:15px;
+ width:100px;
+ text-align:center;
+ box-shadow:0 0 15px rgba(255,255,255,0.1);
+}
+
+.panel div{
+ margin:10px 0;
+}
+
+/* GAME WINDOW */
+#gameBox{
+ position:relative;
+ border-radius:20px;
+ overflow:hidden;
+ box-shadow:0 0 30px rgba(0,0,0,0.8);
+}
+
+/* CANVAS */
+canvas{
+ display:block;
+ background:#020617;
+}
+
+/* GAME OVER */
+#gameOver{
  position:absolute;
  width:100%;
  height:100%;
  display:flex;
  justify-content:center;
  align-items:center;
- z-index:3;
+ flex-direction:column;
+ background:rgba(0,0,0,0.7);
+ opacity:0;
+ pointer-events:none;
+ transition:0.3s;
 }
 
-.card{
- background:#111;
- padding:25px;
- border-radius:20px;
- text-align:center;
- width:260px;
- color:white;
+#gameOver.show{
+ opacity:1;
+ pointer-events:auto;
 }
 
-.btn{
- width:200px;
- padding:12px;
- margin:6px;
- border-radius:30px;
- border:none;
- background:#f59e0b;
+#gameOver h1{
+ color:#ff4444;
 }
-
-/* HUD */
-#hud{
- position:absolute;
- top:10px;
- left:10px;
- color:white;
- font-size:14px;
-}
-
-/* MISSIONS */
-#missions{
- position:absolute;
- top:40px;
- left:10px;
- color:white;
- font-size:12px;
-}
-
-canvas{position:absolute;}
 </style>
 </head>
 
 <body>
 
-<div id="bg"></div>
+<div id="wrapper">
 
-<div id="menu">
- <div class="card">
-  <h2>TAP & DODGE</h2>
-  <button class="btn" onclick="startGame()">NEW GAME</button>
-  <div>💎 Coins: <span id="coins">0</span></div>
+ <!-- LEFT -->
+ <div class="panel">
+  <div>Score</div>
+  <div id="score">0</div>
  </div>
+
+ <!-- GAME -->
+ <div id="gameBox">
+  <canvas id="game" width="300" height="500"></canvas>
+
+  <div id="gameOver">
+   <h1>GAME OVER</h1>
+   <p>Tap to restart</p>
+  </div>
+ </div>
+
+ <!-- RIGHT -->
+ <div class="panel">
+  <div>Time</div>
+  <div id="time">0</div>
+
+  <div>Speed</div>
+  <div id="speed">0</div>
+ </div>
+
 </div>
-
-<div id="hud">
- 💎 <span id="coinsHud">0</span>
-</div>
-
-<div id="missions"></div>
-
-<canvas id="game"></canvas>
 
 <script>
 const canvas=document.getElementById("game");
 const ctx=canvas.getContext("2d");
 
-function resize(){
- canvas.width=innerWidth;
- canvas.height=innerHeight;
-}
-resize();
-window.addEventListener("resize",resize);
-
-// GAME
-let player,obstacles,score,speed,playing,time;
-let coins=parseInt(localStorage.getItem("coins")||0);
-
-// MISSIONS
-let missions=[];
-
-function generateMissions(){
- missions=[
-  {text:"Score 10",type:"score",goal:10,reward:5,done:false},
-  {text:"Survive 15s",type:"time",goal:900,reward:7,done:false},
-  {text:"Speed 6",type:"speed",goal:6,reward:10,done:false}
- ];
-}
-
-function updateMissions(){
- missions.forEach(m=>{
-  if(m.done)return;
-
-  if(m.type==="score" && score>=m.goal) completeMission(m);
-  if(m.type==="time" && time>=m.goal) completeMission(m);
-  if(m.type==="speed" && speed>=m.goal) completeMission(m);
- });
-
- renderMissions();
-}
-
-function completeMission(m){
- m.done=true;
- coins+=m.reward;
- saveCoins();
-}
-
-function renderMissions(){
- document.getElementById("missions").innerHTML=
-  missions.map(m=>`
-   <div style="color:${m.done?'#22c55e':'#fff'}">
-   ${m.done?'✔ ':'• '} ${m.text} (+${m.reward})
-   </div>
-  `).join("");
-
- document.getElementById("coinsHud").innerText=coins;
- document.getElementById("coins").innerText=coins;
-}
-
-// SAVE
-function saveCoins(){
- localStorage.setItem("coins",coins);
-}
+let player,obstacles,playing,gameOverState;
+let score,time,speed;
 
 // PLAYER
 class Player{
  constructor(){
   this.x=canvas.width/2;
   this.targetX=this.x;
-  this.y=canvas.height-120;
+  this.y=canvas.height-80;
  }
+
  update(){
   this.x+=(this.targetX-this.x)*0.2;
  }
+
  draw(){
-  ctx.fillStyle="#22c55e";
+  let g=ctx.createRadialGradient(this.x,this.y,2,this.x,this.y,12);
+  g.addColorStop(0,"#a7f3d0");
+  g.addColorStop(1,"#22c55e");
+
+  ctx.fillStyle=g;
   ctx.beginPath();
   ctx.arc(this.x,this.y,12,0,Math.PI*2);
   ctx.fill();
  }
+
  move(){
   this.targetX=this.targetX<canvas.width/2
    ?canvas.width*0.75
@@ -172,13 +150,19 @@ class Player{
 // OBSTACLE
 class Obstacle{
  constructor(){
-  this.gap=130;
+  this.gap=160;
   this.x=Math.random()*(canvas.width-this.gap);
   this.y=-30;
  }
+
  update(){this.y+=speed;}
+
  draw(){
-  ctx.fillStyle="#ff0055";
+  let g=ctx.createLinearGradient(0,this.y,0,this.y+20);
+  g.addColorStop(0,"#ff7a00");
+  g.addColorStop(1,"#ff0055");
+
+  ctx.fillStyle=g;
   ctx.fillRect(0,this.y,this.x,20);
   ctx.fillRect(this.x+this.gap,this.y,
    canvas.width-(this.x+this.gap),20);
@@ -190,13 +174,19 @@ function startGame(){
  player=new Player();
  obstacles=[];
  score=0;
- speed=4;
  time=0;
+ speed=3;
  playing=true;
+ gameOverState=false;
 
- generateMissions();
+ document.getElementById("gameOver").classList.remove("show");
+}
 
- document.getElementById("menu").style.display="none";
+// GAME OVER
+function triggerGameOver(){
+ playing=false;
+ gameOverState=true;
+ document.getElementById("gameOver").classList.add("show");
 }
 
 // LOOP
@@ -206,7 +196,9 @@ function loop(){
  if(playing){
   time++;
 
-  if(time%120==0) speed+=0.5;
+  if(time%120===0){
+   speed+=0.3;
+  }
 
   player.update();
   player.draw();
@@ -217,8 +209,7 @@ function loop(){
 
    if(player.y<o.y+20 && player.y>o.y){
     if(player.x<o.x || player.x>o.x+o.gap){
-     playing=false;
-     document.getElementById("menu").style.display="flex";
+     triggerGameOver();
     }
    }
 
@@ -229,7 +220,10 @@ function loop(){
 
   obstacles=obstacles.filter(o=>o.y<canvas.height);
 
-  updateMissions();
+  // UI update
+  document.getElementById("score").innerText=score;
+  document.getElementById("time").innerText=(time/60).toFixed(1);
+  document.getElementById("speed").innerText=speed.toFixed(1);
  }
 
  requestAnimationFrame(loop);
@@ -241,9 +235,19 @@ setInterval(()=>{
 },900);
 
 // INPUT
-canvas.addEventListener("mousedown",()=>player?.move());
-canvas.addEventListener("touchstart",()=>player?.move());
+canvas.addEventListener("mousedown",input);
+canvas.addEventListener("touchstart",input);
 
+function input(){
+ if(gameOverState){
+  startGame();
+ }else{
+  player.move();
+ }
+}
+
+// INIT
+startGame();
 loop();
 </script>
 
