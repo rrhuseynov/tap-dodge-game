@@ -2,52 +2,78 @@
 <html>
 <head>
   <meta charset="UTF-8">
+
+  <!-- 📱 FULLSCREEN iOS -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
   <title>Tap Dodge</title>
   <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
 
+<!-- WELCOME -->
 <div id="welcome" class="screen active">
   <img src="assets/welcome.png" class="bg">
 </div>
 
+<!-- MENU -->
 <div id="menu" class="screen">
   <img src="assets/main_menu.png" class="bg">
+
+  <!-- 🔥 фикс зон -->
   <div class="click start" onclick="show('game_start')"></div>
   <div class="click shop" onclick="show('shop')"></div>
   <div class="click appearance" onclick="show('appearance_ball')"></div>
   <div class="click leaderboard" onclick="show('leaderboard')"></div>
 </div>
 
+<!-- GAME START -->
 <div id="game_start" class="screen">
   <img src="assets/game_start.png" class="bg">
   <div class="full" onclick="show('game')"></div>
 </div>
 
+<!-- GAME -->
 <div id="game" class="screen">
   <img src="assets/game.png" class="bg">
+
+  <div id="scoreText" class="ui score">0</div>
+  <div id="coinText" class="ui coins">120</div>
+  <div id="livesText" class="ui lives">❤️❤️❤️</div>
+
   <canvas id="gameCanvas"></canvas>
 
+  <!-- CONTINUE -->
   <div id="continueBox" class="overlay hidden">
     <img src="assets/continue.png" class="popup">
+
+    <div class="continue-btn left" onclick="buyLife()"></div>
+    <div class="continue-btn right" onclick="watchAd()"></div>
   </div>
 </div>
 
+<!-- SHOP -->
 <div id="shop" class="screen">
   <img src="assets/shop.png" class="bg">
   <div class="back" onclick="show('menu')"></div>
 </div>
 
+<!-- APPEARANCE -->
 <div id="appearance_ball" class="screen">
   <img src="assets/appearance-ball.png" class="bg">
   <div class="back" onclick="show('menu')"></div>
 </div>
 
+<!-- LEADERBOARD -->
 <div id="leaderboard" class="screen">
   <img src="assets/leaderboard.png" class="bg">
   <div class="back" onclick="show('menu')"></div>
 </div>
 
 <script src="game.js"></script>
+
 </body>
 </html>
