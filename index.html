@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Tap Dodge Clean</title>
+<title>Tap Dodge</title>
 
 <style>
 html, body{
@@ -12,8 +12,18 @@ html, body{
  overflow:hidden;
  font-family:Arial;
  background:#020617;
+ color:#fff;
 }
 
+/* BACKGROUND CANVAS */
+#bg{
+ position:absolute;
+ top:0;
+ left:0;
+ z-index:0;
+}
+
+/* MENU */
 #menu{
  position:absolute;
  width:100%;
@@ -22,11 +32,35 @@ html, body{
  flex-direction:column;
  justify-content:center;
  align-items:center;
- color:#22c55e;
- font-size:30px;
  z-index:2;
 }
 
+.title{
+ font-size:42px;
+ margin-bottom:30px;
+ color:#22c55e;
+ text-shadow:0 0 20px #22c55e;
+}
+
+.btn{
+ width:220px;
+ padding:15px;
+ margin:10px;
+ font-size:18px;
+ border:none;
+ border-radius:12px;
+ background:rgba(34,197,94,0.2);
+ color:#22c55e;
+ backdrop-filter: blur(10px);
+ border:1px solid #22c55e;
+}
+
+.btn:hover{
+ background:#22c55e;
+ color:#000;
+}
+
+/* GAME UI */
 #top{
  position:absolute;
  top:0;
@@ -34,15 +68,29 @@ html, body{
  display:flex;
  justify-content:space-between;
  padding:10px;
- color:#fff;
  display:none;
+ z-index:3;
+}
+
+canvas#game{
+ position:absolute;
+ top:0;
+ left:0;
+ z-index:1;
 }
 </style>
 </head>
 
 <body>
 
-<div id="menu">TAP TO START</div>
+<canvas id="bg"></canvas>
+
+<div id="menu">
+ <div class="title">TAP DODGE</div>
+ <button class="btn" onclick="startGame()">NEW GAME</button>
+ <button class="btn" onclick="startCrazy()">CRAZY MODE</button>
+ <button class="btn" onclick="showBest()">LEADERBOARD</button>
+</div>
 
 <div id="top">
  <div>Score: <span id="score">0</span></div>
@@ -52,53 +100,90 @@ html, body{
 <canvas id="game"></canvas>
 
 <script>
-// CANVAS
+// ===== BACKGROUND ANIMATION =====
+const bg = document.getElementById("bg");
+const bgCtx = bg.getContext("2d");
+
+function resizeAll(){
+ bg.width = innerWidth;
+ bg.height = innerHeight;
+ canvas.width = innerWidth;
+ canvas.height = innerHeight;
+}
+window.addEventListener("resize", resizeAll);
+
+// stars
+let stars=[];
+for(let i=0;i<80;i++){
+ stars.push({
+  x:Math.random()*innerWidth,
+  y:Math.random()*innerHeight,
+  speed:Math.random()*1+0.5
+ });
+}
+
+function drawBG(){
+ bgCtx.fillStyle="#020617";
+ bgCtx.fillRect(0,0,bg.width,bg.height);
+
+ bgCtx.fillStyle="#22c55e";
+ stars.forEach(s=>{
+  bgCtx.fillRect(s.x,s.y,2,2);
+  s.y+=s.speed;
+  if(s.y>bg.height)s.y=0;
+ });
+
+ requestAnimationFrame(drawBG);
+}
+drawBG();
+
+// ===== GAME =====
 const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
 
-function resize(){
- canvas.width = window.innerWidth;
- canvas.height = window.innerHeight;
-}
-resize();
-window.addEventListener("resize", resize);
+let player, obstacles, score, best, speed, playing;
 
-// ===== PLAYER CLASS =====
-class Player {
+// PLAYER
+class Player{
  constructor(){
   this.x = canvas.width/2;
   this.targetX = this.x;
-  this.y = canvas.height - 120;
+  this.y = canvas.height-120;
  }
 
  update(){
-  this.x += (this.targetX - this.x) * 0.2;
+  this.x += (this.targetX-this.x)*0.2;
  }
 
  draw(){
+  ctx.shadowBlur=20;
+  ctx.shadowColor="#22c55e";
+
   ctx.fillStyle="#22c55e";
   ctx.beginPath();
   ctx.arc(this.x,this.y,10,0,Math.PI*2);
   ctx.fill();
+
+  ctx.shadowBlur=0;
  }
 
- switchSide(){
+ move(){
   this.targetX = this.targetX < canvas.width/2
    ? canvas.width*0.75
    : canvas.width*0.25;
  }
 }
 
-// ===== OBSTACLE CLASS =====
-class Obstacle {
+// OBSTACLE
+class Obstacle{
  constructor(){
-  this.gap = 120;
-  this.x = Math.random() * (canvas.width - this.gap);
-  this.y = -30;
+  this.gap=120;
+  this.x=Math.random()*(canvas.width-this.gap);
+  this.y=-30;
  }
 
- update(speed){
-  this.y += speed;
+ update(){
+  this.y+=speed;
  }
 
  draw(){
@@ -108,106 +193,97 @@ class Obstacle {
  }
 }
 
-// ===== GAME CLASS =====
-class Game {
- constructor(){
-  this.player = new Player();
-  this.obstacles = [];
-  this.score = 0;
-  this.best = localStorage.getItem("best") || 0;
-  this.speed = 4;
-  this.playing = false;
+// INIT
+function init(){
+ player=new Player();
+ obstacles=[];
+ score=0;
+ best=localStorage.getItem("best")||0;
+ speed=4;
+ playing=true;
 
-  document.getElementById("best").innerText = this.best;
- }
-
- start(){
-  this.playing = true;
-  this.score = 0;
-  this.speed = 4;
-  this.obstacles = [];
-  this.player = new Player();
-
-  document.getElementById("menu").style.display="none";
-  document.getElementById("top").style.display="flex";
-  document.getElementById("score").innerText = this.score;
- }
-
- spawn(){
-  this.obstacles.push(new Obstacle());
- }
-
- update(){
-  ctx.fillStyle="rgba(2,6,23,0.4)";
-  ctx.fillRect(0,0,canvas.width,canvas.height);
-
-  this.player.update();
-  this.player.draw();
-
-  if(this.playing){
-   this.obstacles.forEach(o=>{
-    o.update(this.speed);
-    o.draw();
-
-    // collision
-    if(this.player.y < o.y+20 && this.player.y > o.y){
-     if(this.player.x < o.x || this.player.x > o.x+o.gap){
-      this.gameOver();
-     }
-    }
-
-    // passed
-    if(o.y > canvas.height){
-     this.score++;
-     this.speed += 0.1;
-     document.getElementById("score").innerText = this.score;
-    }
-   });
-
-   this.obstacles = this.obstacles.filter(o=>o.y < canvas.height);
-  }
- }
-
- gameOver(){
-  this.playing = false;
-
-  if(this.score > this.best){
-   this.best = this.score;
-   localStorage.setItem("best", this.best);
-  }
-
-  document.getElementById("menu").innerText="GAME OVER\nTAP TO RESTART";
-  document.getElementById("menu").style.display="flex";
-  document.getElementById("top").style.display="none";
- }
+ document.getElementById("score").innerText=score;
+ document.getElementById("best").innerText=best;
 }
 
-// INIT GAME
-const game = new Game();
+// START MODES
+function startGame(){
+ init();
+ speed=4;
+ startUI();
+}
 
-// INPUT
-canvas.addEventListener("touchstart", handleTap);
-canvas.addEventListener("mousedown", handleTap);
+function startCrazy(){
+ init();
+ speed=7; // быстрее
+ startUI();
+}
 
-function handleTap(){
- if(!game.playing){
-  game.start();
- } else {
-  game.player.switchSide();
+function startUI(){
+ document.getElementById("menu").style.display="none";
+ document.getElementById("top").style.display="flex";
+}
+
+// LEADERBOARD
+function showBest(){
+ alert("BEST SCORE: " + (localStorage.getItem("best")||0));
+}
+
+// GAME OVER
+function gameOver(){
+ playing=false;
+
+ if(score>best){
+  best=score;
+  localStorage.setItem("best",best);
  }
+
+ document.getElementById("menu").style.display="flex";
+ document.getElementById("top").style.display="none";
 }
 
 // LOOP
 function loop(){
- game.update();
+ ctx.clearRect(0,0,canvas.width,canvas.height);
+
+ if(playing){
+  player.update();
+  player.draw();
+
+  obstacles.forEach(o=>{
+   o.update();
+   o.draw();
+
+   if(player.y<o.y+20 && player.y>o.y){
+    if(player.x<o.x || player.x>o.x+o.gap){
+     gameOver();
+    }
+   }
+
+   if(o.y>canvas.height){
+    score++;
+    speed+=0.1;
+    document.getElementById("score").innerText=score;
+   }
+  });
+
+  obstacles=obstacles.filter(o=>o.y<canvas.height);
+ }
+
  requestAnimationFrame(loop);
 }
 
-// SPAWN LOOP
+// SPAWN
 setInterval(()=>{
- if(game.playing) game.spawn();
-}, 1000);
+ if(playing) obstacles.push(new Obstacle());
+},1000);
 
+// INPUT
+canvas.addEventListener("touchstart",()=>player?.move());
+canvas.addEventListener("mousedown",()=>player?.move());
+
+// START
+resizeAll();
 loop();
 </script>
 
