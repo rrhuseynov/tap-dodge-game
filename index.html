@@ -6,14 +6,8 @@
 <title>Tap & Dodge</title>
 
 <style>
-html,body{
- margin:0;
- padding:0;
- overflow:hidden;
- font-family:Arial;
-}
+html,body{margin:0;padding:0;overflow:hidden;font-family:Arial;}
 
-/* BACKGROUND */
 #bg{
  position:absolute;
  width:100%;
@@ -21,10 +15,7 @@ html,body{
  background:url("bg.png") center/cover no-repeat;
  transition:0.3s;
 }
-
-#bg.blur{
- filter:blur(6px) brightness(0.6);
-}
+#bg.blur{filter:blur(6px) brightness(0.6);}
 
 /* MENU */
 #menu{
@@ -39,7 +30,7 @@ html,body{
 
 .card{
  background:#111;
- padding:30px;
+ padding:25px;
  border-radius:20px;
  text-align:center;
  width:260px;
@@ -47,49 +38,25 @@ html,body{
 
 .btn{
  width:200px;
- padding:14px;
- margin:8px 0;
- border:none;
+ padding:12px;
+ margin:6px;
  border-radius:30px;
- font-size:15px;
+ border:none;
 }
-
 .main{background:#f59e0b;}
 .secondary{
- background:transparent;
  border:2px solid #f59e0b;
+ background:transparent;
  color:#f59e0b;
 }
 
-/* LEADERBOARD */
-#leaderboard{
+/* MISSIONS */
+#missions{
  position:absolute;
- width:100%;
- height:100%;
- display:none;
- justify-content:center;
- align-items:center;
+ top:10px;
+ left:10px;
  color:white;
- z-index:4;
-}
-
-.board{
- background:#000;
- padding:20px;
- border-radius:20px;
-}
-
-/* GAME OVER */
-#gameOver{
- position:absolute;
- width:100%;
- height:100%;
- display:none;
- justify-content:center;
- align-items:center;
- flex-direction:column;
- color:white;
- z-index:4;
+ font-size:12px;
 }
 
 canvas{position:absolute;}
@@ -100,28 +67,13 @@ canvas{position:absolute;}
 
 <div id="bg"></div>
 
-<!-- MENU -->
 <div id="menu">
  <div class="card">
   <button class="btn main" onclick="startGame()">NEW GAME</button>
-  <button class="btn secondary" onclick="showLeaderboard()">LEADERBOARD</button>
  </div>
 </div>
 
-<!-- LEADERBOARD -->
-<div id="leaderboard">
- <div class="board">
-  <h2>Top Scores</h2>
-  <div id="scores"></div>
-  <button onclick="closeBoard()">Back</button>
- </div>
-</div>
-
-<!-- GAME OVER -->
-<div id="gameOver">
- <h1>GAME OVER</h1>
- <p>Tap to restart</p>
-</div>
+<div id="missions"></div>
 
 <canvas id="game"></canvas>
 
@@ -136,7 +88,39 @@ function resize(){
 resize();
 window.addEventListener("resize",resize);
 
-let player,obstacles,score,speed,playing,gameOverState,time=0;
+let player,obstacles,score,speed,playing,time;
+
+// MISSIONS
+let missions=[];
+
+function generateMissions(){
+ missions=[
+  {text:"Score 10",type:"score",goal:10,done:false},
+  {text:"Survive 20s",type:"time",goal:1200,done:false},
+  {text:"Reach speed 6",type:"speed",goal:6,done:false}
+ ];
+}
+
+function updateMissions(){
+ missions.forEach(m=>{
+  if(m.done)return;
+
+  if(m.type==="score" && score>=m.goal) m.done=true;
+  if(m.type==="time" && time>=m.goal) m.done=true;
+  if(m.type==="speed" && speed>=m.goal) m.done=true;
+ });
+
+ renderMissions();
+}
+
+function renderMissions(){
+ document.getElementById("missions").innerHTML=
+  missions.map(m=>`
+   <div style="color:${m.done?'#22c55e':'#fff'}">
+   ${m.done?'✔ ':'• '}${m.text}
+   </div>
+  `).join("");
+}
 
 // PLAYER
 class Player{
@@ -145,18 +129,15 @@ class Player{
   this.targetX=this.x;
   this.y=canvas.height-120;
  }
-
  update(){
   this.x+=(this.targetX-this.x)*0.2;
  }
-
  draw(){
   ctx.fillStyle="#22c55e";
   ctx.beginPath();
   ctx.arc(this.x,this.y,12,0,Math.PI*2);
   ctx.fill();
  }
-
  move(){
   this.targetX=this.targetX<canvas.width/2
    ?canvas.width*0.75
@@ -171,9 +152,7 @@ class Obstacle{
   this.x=Math.random()*(canvas.width-this.gap);
   this.y=-30;
  }
-
  update(){this.y+=speed;}
-
  draw(){
   let g=ctx.createLinearGradient(0,this.y,0,this.y+20);
   g.addColorStop(0,"#ff7a00");
@@ -194,42 +173,11 @@ function startGame(){
  speed=4;
  time=0;
  playing=true;
- gameOverState=false;
+
+ generateMissions();
 
  document.getElementById("menu").style.display="none";
  document.getElementById("bg").classList.add("blur");
-}
-
-// GAME OVER
-function triggerGameOver(){
- playing=false;
- gameOverState=true;
-
- saveScore();
-
- document.getElementById("gameOver").style.display="flex";
-}
-
-// SAVE SCORE
-function saveScore(){
- let scores=JSON.parse(localStorage.getItem("scores")||"[]");
- scores.push(score);
- scores.sort((a,b)=>b-a);
- scores=scores.slice(0,5);
- localStorage.setItem("scores",JSON.stringify(scores));
-}
-
-// LEADERBOARD
-function showLeaderboard(){
- document.getElementById("leaderboard").style.display="flex";
-
- let scores=JSON.parse(localStorage.getItem("scores")||"[]");
- document.getElementById("scores").innerHTML =
-  scores.map(s=>"<div>"+s+"</div>").join("");
-}
-
-function closeBoard(){
- document.getElementById("leaderboard").style.display="none";
 }
 
 // LOOP
@@ -239,10 +187,7 @@ function loop(){
  if(playing){
   time++;
 
-  // ⚡ ускорение каждые ~2 сек
-  if(time%120==0){
-   speed+=0.5;
-  }
+  if(time%120==0) speed+=0.5;
 
   player.update();
   player.draw();
@@ -253,7 +198,9 @@ function loop(){
 
    if(player.y<o.y+20 && player.y>o.y){
     if(player.x<o.x || player.x>o.x+o.gap){
-     triggerGameOver();
+     playing=false;
+     document.getElementById("menu").style.display="flex";
+     document.getElementById("bg").classList.remove("blur");
     }
    }
 
@@ -263,6 +210,8 @@ function loop(){
   });
 
   obstacles=obstacles.filter(o=>o.y<canvas.height);
+
+  updateMissions();
  }
 
  requestAnimationFrame(loop);
@@ -274,17 +223,8 @@ setInterval(()=>{
 },900);
 
 // INPUT
-canvas.addEventListener("mousedown",input);
-canvas.addEventListener("touchstart",input);
-
-function input(){
- if(gameOverState){
-  document.getElementById("gameOver").style.display="none";
-  startGame();
- }else if(playing){
-  player.move();
- }
-}
+canvas.addEventListener("mousedown",()=>player?.move());
+canvas.addEventListener("touchstart",()=>player?.move());
 
 loop();
 </script>
