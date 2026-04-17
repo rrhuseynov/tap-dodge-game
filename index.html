@@ -13,24 +13,21 @@ html, body{
  font-family:Arial;
 }
 
-/* 🔥 ГАРАНТИРОВАННЫЙ ФОН (градиент + неон) */
+/* 📷 IMAGE BACKGROUND */
 #bg{
  position:absolute;
  width:100%;
  height:100%;
- background:
- radial-gradient(circle at 30% 30%, rgba(0,255,200,0.15), transparent),
- radial-gradient(circle at 70% 70%, rgba(0,150,255,0.15), transparent),
- linear-gradient(120deg,#020617,#0f172a,#020617);
+ background:url("https://images.unsplash.com/photo-1504384308090-c894fdcc538d?q=80&w=1600") center/cover no-repeat;
 }
 
-/* 🌫 МЯГКИЙ BLUR (не убивает фон) */
+/* 🌫 BLUR + DARK */
 #overlay{
  position:absolute;
  width:100%;
  height:100%;
- backdrop-filter: blur(3px);
- background:rgba(0,0,0,0.3);
+ backdrop-filter:blur(6px);
+ background:rgba(0,0,0,0.4);
 }
 
 /* MENU */
@@ -39,9 +36,9 @@ html, body{
  width:100%;
  height:100%;
  display:flex;
- flex-direction:column;
  justify-content:center;
  align-items:center;
+ flex-direction:column;
  color:white;
  z-index:2;
 }
@@ -166,12 +163,17 @@ function startGame(){
 
  best = localStorage.getItem("best") || 0;
 
+ // 👉 убираем blur во время игры
+ document.getElementById("overlay").style.display="none";
+
  document.getElementById("menu").style.display="none";
  document.getElementById("top").style.display="flex";
 }
 
 function gameOver(){
  playing=false;
+
+ document.getElementById("overlay").style.display="block";
 
  if(score>best){
   best=score;
