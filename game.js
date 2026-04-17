@@ -10,14 +10,26 @@ window.onload = () => {
   }, 1200);
 };
 
-/* ===== SHOP ===== */
+/* SHOP */
 
 let coins = 500;
 
 const shopData = [
-  { icon: "💰", amount: 1000, price: 180 },
-  { icon: "🧰", amount: 5000, price: 700 },
-  { icon: "💎", amount: 1200, price: 1200 }
+  {
+    img: "assets/bag.png",
+    amount: 1000,
+    price: 180
+  },
+  {
+    img: "assets/chest.png",
+    amount: 5000,
+    price: 700
+  },
+  {
+    img: "assets/chest_gems.png",
+    amount: 1200,
+    price: 1200
+  }
 ];
 
 function renderShop() {
@@ -29,16 +41,14 @@ function renderShop() {
     div.className = "shop-item";
 
     div.innerHTML = `
-      <div class="shop-icon">${item.icon}</div>
+      <img src="${item.img}" class="shop-icon">
       <div class="shop-text">+${item.amount}</div>
-      <div class="buy-btn" onclick="buy(${item.price})">🪙 ${item.price}</div>
+
+      <img src="assets/price_btn.png" class="price-btn">
+      <img src="assets/coin.png" class="coin-icon">
+      <div class="price-text">${item.price}</div>
     `;
 
     container.appendChild(div);
   });
-}
-
-function buy(price) {
-  coins += price;
-  alert("Coins: " + coins);
 }
