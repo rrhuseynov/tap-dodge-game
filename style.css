@@ -1,34 +1,96 @@
-/* UI поверх */
-.ui {
-  position: absolute;
-  font-size: 22px;
-  font-weight: bold;
-  color: white;
+body {
+  margin: 0;
+  background: #111;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
 }
 
-.score {
-  top: 6%;
-  left: 15%;
+/* контейнер как телефон */
+.screen {
+  display: none;
+  position: relative;
+  width: 390px;
+  height: 844px;
+  overflow: hidden;
+  border-radius: 25px;
+  box-shadow: 0 0 30px rgba(0,0,0,0.5);
 }
 
-.coins {
-  top: 6%;
-  right: 10%;
+.screen.active {
+  display: block;
 }
 
-.lives {
-  top: 12%;
-  left: 15%;
-}
-
-/* canvas */
-#gameCanvas {
+/* фон */
+.bg {
   position: absolute;
   width: 100%;
   height: 100%;
+  object-fit: cover;
 }
 
-/* continue кнопки */
+/* canvas внутри игры */
+#gameCanvas {
+  position: absolute;
+  width: 70%;
+  height: 60%;
+  left: 15%;
+  top: 20%;
+  border-radius: 20px;
+}
+
+/* UI */
+.ui {
+  position: absolute;
+  color: white;
+  font-weight: bold;
+}
+
+.score { top: 6%; left: 12%; }
+.coins { top: 6%; right: 10%; }
+.lives { top: 12%; left: 12%; }
+
+/* кнопки меню */
+.click {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 220px;
+  height: 60px;
+}
+
+.start { top: 38%; }
+.shop { top: 48%; }
+.appearance { top: 58%; }
+.leaderboard { top: 68%; }
+
+/* back */
+.back {
+  position: absolute;
+  bottom: 5%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 200px;
+  height: 80px;
+}
+
+/* continue overlay */
+.overlay {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.5);
+}
+
+.popup {
+  position: absolute;
+  width: 80%;
+  left: 50%;
+  top: 40%;
+  transform: translate(-50%, -50%);
+}
+
 .continue-btn {
   position: absolute;
   width: 120px;
@@ -36,10 +98,9 @@
   top: 55%;
 }
 
-.continue-btn.left {
-  left: 25%;
-}
+.left { left: 20%; }
+.right { right: 20%; }
 
-.continue-btn.right {
-  right: 25%;
+.hidden {
+  display: none;
 }
