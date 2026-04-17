@@ -1,102 +1,36 @@
-body {
-  margin: 0;
-  background: black;
-  font-family: Arial, sans-serif;
-}
+<div id="game" class="screen">
+  <img src="assets/game_start.png" class="bg">
 
-/* screens */
-.screen {
-  display: none;
-  position: fixed;
-  width: 100vw;
-  height: 100vh;
-}
+  <!-- UI -->
+  <div class="top-ui">
 
-.screen.active {
-  display: block;
-}
+    <div class="score-box">
+      <div class="label">SCORE</div>
+      <div id="scoreText">0</div>
+    </div>
 
-.bg {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
+    <div class="level-box">
+      LEVEL 1
+      <div class="bar">
+        <div id="progress"></div>
+      </div>
+    </div>
 
-/* ===== GAME UI ===== */
+    <div class="best-box">
+      <div class="label">BEST</div>
+      <div id="bestText">0</div>
+    </div>
 
-.top-ui {
-  position: absolute;
-  top: 5%;
-  width: 100%;
-  display: flex;
-  justify-content: space-around;
-  align-items: center;
-}
+  </div>
 
-.score-box, .best-box {
-  background: linear-gradient(#ff9a2e, #ff6a00);
-  padding: 10px 20px;
-  border-radius: 15px;
-  text-align: center;
-  color: white;
-  font-weight: bold;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-}
+  <!-- hearts -->
+  <div id="livesText" class="hearts">❤️❤️❤️</div>
 
-.best-box {
-  background: linear-gradient(#4da6ff, #1c6cff);
-}
+  <!-- coins -->
+  <div class="coins">
+    🪙 <span id="coinText">120</span>
+  </div>
 
-.label {
-  font-size: 12px;
-}
-
-.level-box {
-  text-align: center;
-  color: white;
-  font-weight: bold;
-}
-
-.bar {
-  width: 100px;
-  height: 8px;
-  background: rgba(255,255,255,0.3);
-  border-radius: 10px;
-  margin-top: 5px;
-}
-
-#progress {
-  height: 100%;
-  width: 0%;
-  background: #4cff7a;
-  border-radius: 10px;
-  transition: width 0.2s;
-}
-
-/* hearts */
-.hearts {
-  position: absolute;
-  top: 12%;
-  left: 10%;
-  font-size: 22px;
-}
-
-/* coins */
-.coins {
-  position: absolute;
-  top: 12%;
-  right: 10%;
-  color: white;
-  font-weight: bold;
-  font-size: 18px;
-}
-
-/* canvas */
-#gameCanvas {
-  position: absolute;
-  width: 70%;
-  height: 60%;
-  left: 15%;
-  top: 20%;
-  border-radius: 20px;
-}
+  <!-- game -->
+  <canvas id="gameCanvas"></canvas>
+</div>
