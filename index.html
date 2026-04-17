@@ -1,1 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Tap Dodge</title>
 
+<style>
+html, body{
+ margin:0;
+ padding:0;
+ background:#020617;
+ color:#fff;
+ font-family:Arial;
+ overflow:hidden;
+ text-align:center;
+}
+
+#top{
+ display:flex;
+ justify-content:space-between;
+ padding:12px 15px;
+ font-size:18px;
+}
+
+#menu{
+ position:absolute;
+ top:50%;
+ left:50%;
+ transform:translate(-50%, -50%);
+ font-size:24px;
+ opacity:0.8;
+}
+
+canvas{
+ display:block;
+ margin:auto;
+ background:#000;
+ border-radius:12px;
+ width:90vw;
+ max-width:350px;
+ height:auto;
+}
+</style>
+</head>
+
+<body>
+
+<div id="top">
+ <div>Score: <span id="score">0</span></div>
+ <div>Best: <span id="best">0</span></div>
+</div>
+
+<div id="menu">TAP TO START</div>
+
+<canvas id="game" width="300" height="500"></canvas>
+
+<script>
+const canvas = document.getElementById("game");
+const ctx = canvas.getContext("2d");
+
+let player = {
+ x:150,
+ targetX:150,
+ y:400
+};
+
+let obstacles = [];
+let score = 0;
+let best = localStorage.getItem("dodgeBest") || 0;
+let speed = 4;
+let playing = false;
+
+document.getElementById("best").innerText = best;
+
+// СПАВН
+function spawn(){
+ let gap = 80;
+ let x = Math.random()*(300-gap);
+
+ obstacles.push({
+  x: x,
+  width: gap,
+  y: -20
+ });
+}
+
+// ИГРОК
+function drawPlayer(){
+ player.x += (player.targetX - player.x)*0.2;
+
+ ctx.fillStyle = "#22c55e";
+ ctx.beginPath();
+ ctx.arc(player.x, player.y, 10, 0, Math.PI*2);
+ ctx.fill();
+}
+
+// ПРЕПЯТСТВИЯ
+function drawObstacles(){
+ ctx.fillStyle = "#ef4444";
+
+ obstacles.forEach(o=>{
+  ctx.fillRect(0, o.y, o.x, 20);
+  ctx.fillRect(o.x + o.width, o.y, 300 - (o.x+o.width), 20);
+ });
+}
+
+// GAME OVER
+function gameOver(){
+ playing = false;
+
+ if(score > best){
+  best = score;
+  localStorage.setItem("dodgeBest", best);
+ }
+
+ document.getElementById("menu").innerText = "GAME OVER\nTAP TO RESTART";
+ document.getElementById("menu").style.display = "block";
+}
+
+// ОБНОВЛЕНИЕ
+function update(){
+ ctx.clearRect(0,0,300,500);
+
+ drawPlayer();
+ drawObstacles();
+
+ if(playing){
+  obstacles.forEach(o=>{
+   o.y += speed;
+
+   if(player.y < o.y+20 && player.y > o.y){
+    if(player.x < o.x || player.x > o.x + o.width){
+     gameOver();
+    }
+   }
+
+   if(o.y > 500){
+    score++;
+    speed += 0.1;
+    document.getElementById("score").innerText = score;
+   }
+  });
+
+  obstacles = obstacles.filter(o=>o.y < 500);
+ }
+
+ requestAnimationFrame(update);
+}
+
+// TAP
+function tap(){
+ if(!playing){
+  startGame();
+  return;
+ }
+
+ player.targetX = player.targetX === 80 ? 220 : 80;
+}
+
+// START
+function startGame(){
+ playing = true;
+ score = 0;
+ speed = 4;
+ obstacles = [];
+
+ player.x = 150;
+ player.targetX = 150;
+
+ document.getElementById("score").innerText = score;
+ document.getElementById("menu").style.display = "none";
+}
+
+// EVENTS
+canvas.addEventListener("touchstart", tap);
+canvas.addEventListener("mousedown", tap);
+
+// SPAWN LOOP
+setInterval(()=>{
+ if(playing) spawn();
+}, 1000);
+
+update();
+</script>
+
+</body>
+</html>
