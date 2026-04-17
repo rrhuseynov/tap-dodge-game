@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Tap Dodge</title>
+<title>Tap & Dodge</title>
 
 <style>
 html, body{
@@ -13,22 +13,20 @@ html, body{
  font-family:Arial;
 }
 
-/* 📷 PNG ФОН */
+/* BACKGROUND */
 #bg{
  position:absolute;
  width:100%;
  height:100%;
  background:url("bg.png") center/cover no-repeat;
- z-index:0;
 }
 
-/* 🌫 затемнение */
+/* DARK OVERLAY */
 #overlay{
  position:absolute;
  width:100%;
  height:100%;
- background:rgba(0,0,0,0.4);
- z-index:1;
+ background:rgba(0,0,0,0.6);
 }
 
 /* MENU */
@@ -39,27 +37,57 @@ html, body{
  display:flex;
  justify-content:center;
  align-items:center;
- flex-direction:column;
- color:white;
  z-index:2;
 }
 
-.title{
- font-size:42px;
- color:#22c55e;
- text-shadow:0 0 20px #22c55e;
+/* CARD */
+.card{
+ background:#0b0b0b;
+ padding:30px;
+ border-radius:20px;
+ text-align:center;
+ box-shadow:0 0 30px rgba(255,165,0,0.2);
+ width:260px;
 }
 
-.btn{
- margin-top:20px;
- padding:15px 30px;
- background:#22c55e;
+/* TITLE */
+.card h1{
+ color:#fff;
+ margin-bottom:10px;
+}
+
+/* SUBTITLE */
+.subtitle{
+ color:#f59e0b;
+ font-size:14px;
+ margin-bottom:20px;
+}
+
+/* MAIN BUTTON */
+.main-btn{
+ width:200px;
+ padding:15px;
+ margin:10px 0;
  border:none;
- border-radius:12px;
- font-size:18px;
+ border-radius:30px;
+ background:#f59e0b;
+ color:#000;
+ font-weight:bold;
+ font-size:16px;
 }
 
-/* UI */
+/* SECOND BUTTON */
+.secondary-btn{
+ width:200px;
+ padding:12px;
+ border:2px solid #f59e0b;
+ border-radius:30px;
+ background:transparent;
+ color:#f59e0b;
+ font-size:14px;
+}
+
+/* TOP UI */
 #top{
  position:absolute;
  top:0;
@@ -72,9 +100,10 @@ html, body{
  z-index:3;
 }
 
+/* CANVAS */
 canvas{
  position:absolute;
- z-index:2;
+ z-index:1;
  background:transparent;
 }
 </style>
@@ -85,11 +114,23 @@ canvas{
 <div id="bg"></div>
 <div id="overlay"></div>
 
+<!-- MENU -->
 <div id="menu">
- <div class="title">TAP DODGE</div>
- <button class="btn" onclick="startGame()">NEW GAME</button>
+  <div class="card">
+    <h1>TAP & DODGE</h1>
+    <p class="subtitle">Dodge obstacles and survive!</p>
+
+    <button class="main-btn" onclick="startGame()">
+      START GAME
+    </button>
+
+    <button class="secondary-btn">
+      🏆 Leaderboard
+    </button>
+  </div>
 </div>
 
+<!-- TOP -->
 <div id="top">
  <div>Score: <span id="score">0</span></div>
  <div>Best: <span id="best">0</span></div>
@@ -108,8 +149,10 @@ function resize(){
 resize();
 window.addEventListener("resize", resize);
 
+// GAME
 let player, obstacles=[], score=0, best=0, speed=4, playing=false;
 
+// PLAYER
 class Player{
  constructor(){
   this.x = canvas.width/2;
@@ -140,6 +183,7 @@ class Player{
  }
 }
 
+// OBSTACLE
 class Obstacle{
  constructor(){
   this.gap=120;
@@ -156,6 +200,7 @@ class Obstacle{
  }
 }
 
+// START
 function startGame(){
  player = new Player();
  obstacles = [];
@@ -165,13 +210,12 @@ function startGame(){
 
  best = localStorage.getItem("best") || 0;
 
- // убираем затемнение во время игры
  document.getElementById("overlay").style.display="none";
-
  document.getElementById("menu").style.display="none";
  document.getElementById("top").style.display="flex";
 }
 
+// GAME OVER
 function gameOver(){
  playing=false;
 
@@ -186,6 +230,7 @@ function gameOver(){
  document.getElementById("top").style.display="none";
 }
 
+// LOOP
 function loop(){
  ctx.clearRect(0,0,canvas.width,canvas.height);
 
@@ -206,6 +251,7 @@ function loop(){
    if(o.y>canvas.height){
     score++;
     speed+=0.1;
+    document.getElementById("score").innerText=score;
    }
   });
 
@@ -215,10 +261,12 @@ function loop(){
  requestAnimationFrame(loop);
 }
 
+// SPAWN
 setInterval(()=>{
  if(playing) obstacles.push(new Obstacle());
 },1000);
 
+// INPUT
 canvas.addEventListener("mousedown",()=>player?.move());
 canvas.addEventListener("touchstart",()=>player?.move());
 
