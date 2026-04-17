@@ -1,3 +1,22 @@
+// ===== NAVIGATION =====
+function show(id) {
+  document.querySelectorAll('.screen').forEach(s => {
+    s.classList.remove('active');
+  });
+
+  document.getElementById(id).classList.add('active');
+
+  if (id === 'game') startGame();
+}
+
+// welcome → menu
+window.onload = function () {
+  setTimeout(() => {
+    show('menu');
+  }, 2000);
+};
+
+// ===== GAME =====
 let canvas = document.getElementById('gameCanvas');
 let ctx = canvas.getContext('2d');
 
@@ -8,28 +27,31 @@ let lives = 3;
 let speedMultiplier = 1;
 let gameRunning = false;
 
-function show(id) {
-  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
-
-  if (id === 'game') startGame();
+// resize canvas
+function resize() {
+  canvas.width = canvas.offsetWidth;
+  canvas.height = canvas.offsetHeight;
 }
+window.addEventListener('resize', resize);
 
-/* welcome */
-setTimeout(() => show('menu'), 2000);
-
-/* START GAME */
+// start game
 function startGame() {
   gameRunning = true;
+
   resize();
 
-  ball = { x: canvas.width / 2, y: canvas.height - 100, r: 15, dx: 0 };
+  ball = {
+    x: canvas.width / 2,
+    y: canvas.height - 40,
+    r: 12,
+    dx: 0
+  };
+
   obstacles = [];
   coins = [];
   score = 0;
+  lives = 3;
   speedMultiplier = 1;
-
-  updateUI();
 
   spawnObstacle();
   spawnCoin();
@@ -37,45 +59,42 @@ function startGame() {
   requestAnimationFrame(loop);
 }
 
-/* resize */
-function resize() {
-  canvas.width = window.innerWidth;
-  canvas.height = window.innerHeight;
-}
-
-window.addEventListener('resize', resize);
-
-/* controls */
+// control
 document.addEventListener('click', () => {
   if (!gameRunning) return;
-  ball.dx = ball.dx === 0 ? 5 : -ball.dx;
+  ball.dx = ball.dx === 0 ? 4 : -ball.dx;
 });
 
-/* spawn */
+// spawn obstacles
 function spawnObstacle() {
+  if (!gameRunning) return;
+
   obstacles.push({
-    x: Math.random() * (canvas.width - 120),
+    x: Math.random() * (canvas.width - 100),
     y: -20,
-    w: 120,
+    w: 100,
     h: 10,
-    speed: (3 + Math.random() * 2) * speedMultiplier
+    speed: (2 + Math.random() * 2) * speedMultiplier
   });
 
-  setTimeout(spawnObstacle, 1000);
+  setTimeout(spawnObstacle, 900);
 }
 
+// spawn coins
 function spawnCoin() {
+  if (!gameRunning) return;
+
   coins.push({
-    x: Math.random() * (canvas.width - 30),
+    x: Math.random() * (canvas.width - 20),
     y: -20,
-    r: 10,
-    speed: 3 * speedMultiplier
+    r: 8,
+    speed: 2 * speedMultiplier
   });
 
-  setTimeout(spawnCoin, 2000);
+  setTimeout(spawnCoin, 1500);
 }
 
-/* LOOP */
+// loop
 function loop() {
   if (!gameRunning) return;
 
@@ -86,21 +105,21 @@ function loop() {
   updateCoins();
 
   score++;
-  if (score % 300 === 0) speedMultiplier += 0.2;
 
-  updateUI();
+  // ускорение
+  if (score % 300 === 0) speedMultiplier += 0.2;
 
   requestAnimationFrame(loop);
 }
 
-/* ball */
+// ball
 function drawBall() {
   ball.x += ball.dx;
 
   if (ball.x < ball.r) ball.x = ball.r;
   if (ball.x > canvas.width - ball.r) ball.x = canvas.width - ball.r;
 
-  let g = ctx.createRadialGradient(ball.x, ball.y, 5, ball.x, ball.y, ball.r);
+  let g = ctx.createRadialGradient(ball.x, ball.y, 3, ball.x, ball.y, ball.r);
   g.addColorStop(0, '#6aff9c');
   g.addColorStop(1, '#2a8cff');
 
@@ -110,14 +129,15 @@ function drawBall() {
   ctx.fill();
 }
 
-/* obstacles */
+// obstacles
 function updateObstacles() {
-  obstacles.forEach(o => {
+  obstacles.forEach((o) => {
     o.y += o.speed;
 
     ctx.fillStyle = '#7CFF6B';
     ctx.fillRect(o.x, o.y, o.w, o.h);
 
+    // collision
     if (
       ball.x > o.x &&
       ball.x < o.x + o.w &&
@@ -129,7 +149,7 @@ function updateObstacles() {
   });
 }
 
-/* coins */
+// coins
 function updateCoins() {
   coins.forEach((c, i) => {
     c.y += c.speed;
@@ -150,7 +170,7 @@ function updateCoins() {
   });
 }
 
-/* life system */
+// life system
 function loseLife() {
   lives--;
 
@@ -166,23 +186,13 @@ function resetBall() {
   ball.dx = 0;
 }
 
-/* UI */
-function updateUI() {
-  document.getElementById('scoreText').innerText = score;
-  document.getElementById('coinText').innerText = coinCount;
-
-  let hearts = '';
-  for (let i = 0; i < lives; i++) hearts += '❤️';
-  document.getElementById('livesText').innerText = hearts;
-}
-
-/* game over */
+// game over
 function gameOver() {
   gameRunning = false;
   document.getElementById('continueBox').classList.remove('hidden');
 }
 
-/* continue */
+// continue
 function buyLife() {
   if (coinCount >= 200) {
     coinCount -= 200;
