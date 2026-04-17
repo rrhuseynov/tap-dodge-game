@@ -10,22 +10,14 @@ window.onload = () => {
   }, 1200);
 };
 
-function goGameStart() {
-  show('game_start');
-}
-
-function startGameNow() {
-  show('game');
-}
-
 /* ===== SHOP ===== */
 
 let coins = 500;
 
 const shopData = [
-  { coins: 1000, price: 180 },
-  { coins: 5000, price: 700 },
-  { coins: 1200, price: 1200 }
+  { icon: "💰", amount: 1000, price: 180 },
+  { icon: "🧰", amount: 5000, price: 700 },
+  { icon: "💎", amount: 1200, price: 1200 }
 ];
 
 function renderShop() {
@@ -37,7 +29,8 @@ function renderShop() {
     div.className = "shop-item";
 
     div.innerHTML = `
-      <div>+${item.coins}</div>
+      <div class="shop-icon">${item.icon}</div>
+      <div class="shop-text">+${item.amount}</div>
       <div class="buy-btn" onclick="buy(${item.price})">🪙 ${item.price}</div>
     `;
 
