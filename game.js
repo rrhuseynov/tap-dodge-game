@@ -3,12 +3,25 @@ function show(id) {
   document.getElementById(id).classList.add('active');
 }
 
+/* ВСЕГДА показать меню */
 window.onload = () => {
   setTimeout(() => {
-    show('menu');
-    renderShop();
-  }, 1000);
+    try {
+      show('menu');
+    } catch (e) {
+      console.log("show error", e);
+    }
+
+    try {
+      renderShop();
+    } catch (e) {
+      console.log("shop error", e);
+    }
+
+  }, 500);
 };
+
+/* SHOP */
 
 const shopData = [
   {
@@ -30,6 +43,8 @@ const shopData = [
 
 function renderShop() {
   const container = document.getElementById("shopItems");
+  if (!container) return;
+
   container.innerHTML = "";
 
   shopData.forEach(item => {
