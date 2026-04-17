@@ -1,17 +1,14 @@
 body {
   margin: 0;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
-  background: #111;
+  background: black;
 }
 
+/* fullscreen */
 .screen {
   display: none;
-  position: relative;
-  width: 390px;
-  height: 844px;
+  position: fixed;
+  width: 100vw;
+  height: 100vh;
 }
 
 .screen.active {
@@ -24,38 +21,84 @@ body {
   object-fit: cover;
 }
 
+/* 🔥 КНОПКИ ПОДОГНАНЫ */
 .click {
   position: absolute;
   left: 50%;
   transform: translateX(-50%);
-  width: 220px;
-  height: 60px;
+  width: 260px;
+  height: 80px;
 }
 
-.start { top: 38%; }
-.shop { top: 48%; }
-.appearance { top: 58%; }
-.leaderboard { top: 68%; }
+/* поправил позиции */
+.start { top: 42%; }
+.shop { top: 52%; }
+.appearance { top: 62%; }
+.leaderboard { top: 72%; }
 
+/* full click */
 .full {
   position: absolute;
   width: 100%;
   height: 100%;
 }
 
+/* back */
 .back {
   position: absolute;
-  bottom: 5%;
+  bottom: 6%;
   left: 50%;
   transform: translateX(-50%);
-  width: 200px;
-  height: 80px;
+  width: 240px;
+  height: 90px;
 }
 
+/* canvas */
 #gameCanvas {
   position: absolute;
   width: 70%;
   height: 60%;
   left: 15%;
   top: 20%;
+}
+
+/* UI */
+.ui {
+  position: absolute;
+  color: white;
+  font-weight: bold;
+}
+
+.score { top: 6%; left: 12%; }
+.coins { top: 6%; right: 10%; }
+.lives { top: 12%; left: 12%; }
+
+/* continue */
+.overlay {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.5);
+}
+
+.popup {
+  position: absolute;
+  width: 80%;
+  left: 50%;
+  top: 40%;
+  transform: translate(-50%, -50%);
+}
+
+.continue-btn {
+  position: absolute;
+  width: 120px;
+  height: 100px;
+  top: 55%;
+}
+
+.left { left: 20%; }
+.right { right: 20%; }
+
+.hidden {
+  display: none;
 }
