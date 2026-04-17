@@ -3,13 +3,10 @@
 <head>
   <meta charset="UTF-8">
 
-  <!-- iPhone fullscreen -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
   <title>Tap Dodge</title>
-
   <link rel="stylesheet" href="style.css">
 </head>
 
@@ -25,82 +22,38 @@
   <img src="assets/main_menu.PNG" class="bg">
 
   <div class="menu-buttons">
-
-    <div class="btn start-btn" onclick="show('game_start')">
-      START
-    </div>
-
-    <div class="btn shop-btn" onclick="show('shop')">
-      SHOP
-    </div>
-
-    <div class="btn appearance-btn" onclick="show('appearance_ball')">
-      APPEARANCE
-    </div>
-
-    <div class="btn leaderboard-btn" onclick="show('leaderboard')">
-      LEADERBOARD
-    </div>
-
+    <button onclick="goGameStart()">START</button>
+    <button onclick="show('shop')">SHOP</button>
+    <button onclick="show('appearance_ball')">APPEARANCE</button>
+    <button onclick="show('leaderboard')">LEADERBOARD</button>
   </div>
 </div>
 
 <!-- GAME START -->
 <div id="game_start" class="screen">
-  <img src="assets/game_start.png" class="bg" onclick="startFromTap()">
+  <img src="assets/game_start.png" class="bg">
+  <div class="tap-area" onclick="startGameNow()"></div>
 </div>
 
 <!-- GAME -->
 <div id="game" class="screen">
   <img src="assets/game_start.png" class="bg">
-
-  <!-- UI -->
-  <div class="top-ui">
-
-    <div class="score-box">
-      <div class="label">SCORE</div>
-      <div id="scoreText">0</div>
-    </div>
-
-    <div class="level-box">
-      LEVEL 1
-      <div class="bar">
-        <div id="progress"></div>
-      </div>
-    </div>
-
-    <div class="best-box">
-      <div class="label">BEST</div>
-      <div id="bestText">0</div>
-    </div>
-
-  </div>
-
-  <!-- hearts -->
-  <div id="livesText" class="hearts">❤️❤️❤️</div>
-
-  <!-- coins -->
-  <div class="coins">
-    🪙 <span id="coinText">120</span>
-  </div>
-
-  <!-- game -->
   <canvas id="gameCanvas"></canvas>
 </div>
 
 <!-- SHOP -->
 <div id="shop" class="screen">
-  <img src="assets/shop.png" class="bg" onclick="backMenu()">
+  <img src="assets/shop.png" class="bg">
 </div>
 
 <!-- APPEARANCE -->
 <div id="appearance_ball" class="screen">
-  <img src="assets/appearance-ball.png" class="bg" onclick="backMenu()">
+  <img src="assets/appearance-ball.png" class="bg">
 </div>
 
 <!-- LEADERBOARD -->
 <div id="leaderboard" class="screen">
-  <img src="assets/leaderboard.png" class="bg" onclick="backMenu()">
+  <img src="assets/leaderboard.png" class="bg">
 </div>
 
 <script src="game.js"></script>
