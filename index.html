@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Tap Dodge Neon</title>
+<title>Tap Dodge Ultra</title>
 
 <style>
 html, body{
@@ -11,7 +11,7 @@ html, body{
  padding:0;
  overflow:hidden;
  font-family:Arial;
- background:linear-gradient(180deg,#020617,#020617 60%,#0f172a);
+ background:#020617;
 }
 
 /* TOP UI */
@@ -23,7 +23,7 @@ html, body{
  justify-content:space-between;
  padding:12px 15px;
  color:#fff;
- backdrop-filter: blur(10px);
+ backdrop-filter: blur(12px);
  background:rgba(0,0,0,0.3);
  font-size:18px;
  z-index:2;
@@ -36,13 +36,21 @@ html, body{
  left:50%;
  transform:translate(-50%,-50%);
  color:#22c55e;
- font-size:28px;
+ font-size:30px;
  text-align:center;
- text-shadow:0 0 20px #22c55e;
+ text-shadow:0 0 25px #22c55e;
  z-index:2;
 }
 
-/* CANVAS */
+/* SOUND BTN */
+#sound{
+ position:absolute;
+ top:10px;
+ right:10px;
+ z-index:3;
+ cursor:pointer;
+}
+
 canvas{
  position:absolute;
  top:0;
@@ -59,6 +67,7 @@ canvas{
 </div>
 
 <div id="menu">TAP TO START</div>
+<div id="sound">🔊</div>
 
 <canvas id="game"></canvas>
 
@@ -73,91 +82,120 @@ function resize(){
 resize();
 window.addEventListener("resize", resize);
 
-// STAR BACKGROUND
-let stars = [];
-for(let i=0;i<80;i++){
- stars.push({
-  x:Math.random()*canvas.width,
-  y:Math.random()*canvas.height,
-  speed:Math.random()*1+0.5
- });
+// AUDIO
+let audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+let soundOn = true;
+
+document.getElementById("sound").onclick=()=>{
+ soundOn = !soundOn;
+ document.getElementById("sound").innerText = soundOn ? "🔊":"🔇";
+};
+
+function beep(f){
+ if(!soundOn) return;
+ let o = audioCtx.createOscillator();
+ let g = audioCtx.createGain();
+ o.connect(g); g.connect(audioCtx.destination);
+ o.frequency.value = f;
+ o.start();
+ g.gain.exponentialRampToValueAtTime(0.0001,audioCtx.currentTime+0.2);
 }
 
+// PARALLAX STARS
+let stars1=[],stars2=[];
+for(let i=0;i<50;i++) stars1.push({x:Math.random()*canvas.width,y:Math.random()*canvas.height});
+for(let i=0;i<30;i++) stars2.push({x:Math.random()*canvas.width,y:Math.random()*canvas.height});
+
 // PLAYER
-let player = { x:0, targetX:0, y:0 };
+let player={x:0,targetX:0,y:0};
+let trail=[];
 
 // STATE
-let obstacles = [];
-let particles = [];
-let score = 0;
-let best = localStorage.getItem("best") || 0;
-let speed = 4;
-let playing = false;
+let obstacles=[],particles=[];
+let score=0;
+let best=localStorage.getItem("best")||0;
+let speed=4;
+let playing=false;
 
-document.getElementById("best").innerText = best;
+document.getElementById("best").innerText=best;
 
-// INIT PLAYER
 function resetPlayer(){
- player.x = canvas.width/2;
- player.targetX = canvas.width/2;
- player.y = canvas.height - 120;
+ player.x=canvas.width/2;
+ player.targetX=canvas.width/2;
+ player.y=canvas.height-120;
 }
 
 // SPAWN
 function spawn(){
- let gap = 120;
- let x = Math.random()*(canvas.width-gap);
- obstacles.push({ x, width:gap, y:-30 });
+ let gap=120;
+ let x=Math.random()*(canvas.width-gap);
+ obstacles.push({x,width:gap,y:-30});
 }
 
-// DRAW STARS
+// STARS
 function drawStars(){
  ctx.fillStyle="#fff";
- stars.forEach(s=>{
+ stars1.forEach(s=>{
+  ctx.fillRect(s.x,s.y,1,1);
+  s.y+=0.5;
+  if(s.y>canvas.height)s.y=0;
+ });
+
+ stars2.forEach(s=>{
   ctx.fillRect(s.x,s.y,2,2);
-  s.y += s.speed;
-  if(s.y > canvas.height) s.y = 0;
+  s.y+=1;
+  if(s.y>canvas.height)s.y=0;
  });
 }
 
-// PLAYER
+// PLAYER + TRAIL
 function drawPlayer(){
- player.x += (player.targetX - player.x)*0.2;
+ player.x += (player.targetX-player.x)*0.2;
 
- ctx.shadowBlur = 20;
- ctx.shadowColor = "#22c55e";
+ trail.push({x:player.x,y:player.y});
+ if(trail.length>10) trail.shift();
+
+ ctx.strokeStyle="#22c55e";
+ ctx.beginPath();
+ trail.forEach((t,i)=>{
+  ctx.lineTo(t.x,t.y);
+ });
+ ctx.stroke();
+
+ ctx.shadowBlur=25;
+ ctx.shadowColor="#22c55e";
 
  ctx.fillStyle="#22c55e";
  ctx.beginPath();
- ctx.arc(player.x, player.y, 10, 0, Math.PI*2);
+ ctx.arc(player.x,player.y,10,0,Math.PI*2);
  ctx.fill();
 
- ctx.shadowBlur = 0;
+ ctx.shadowBlur=0;
 }
 
 // OBSTACLES
 function drawObstacles(){
- ctx.shadowBlur = 10;
- ctx.shadowColor = "#ef4444";
-
+ ctx.shadowBlur=15;
+ ctx.shadowColor="#ef4444";
  ctx.fillStyle="#ef4444";
+
  obstacles.forEach(o=>{
   ctx.fillRect(0,o.y,o.x,20);
   ctx.fillRect(o.x+o.width,o.y,canvas.width-(o.x+o.width),20);
  });
 
- ctx.shadowBlur = 0;
+ ctx.shadowBlur=0;
 }
 
 // PARTICLES
 function explode(){
- for(let i=0;i<30;i++){
+ for(let i=0;i<40;i++){
   particles.push({
    x:player.x,
    y:player.y,
-   dx:(Math.random()-0.5)*8,
-   dy:(Math.random()-0.5)*8,
-   life:30
+   dx:(Math.random()-0.5)*10,
+   dy:(Math.random()-0.5)*10,
+   life:40
   });
  }
 }
@@ -170,13 +208,15 @@ function drawParticles(){
   p.y+=p.dy;
   p.life--;
  });
- particles = particles.filter(p=>p.life>0);
+ particles=particles.filter(p=>p.life>0);
 }
 
 // GAME OVER
 function gameOver(){
  playing=false;
  explode();
+ beep(120);
+ navigator.vibrate?.(100);
 
  if(score>best){
   best=score;
@@ -189,7 +229,7 @@ function gameOver(){
 
 // UPDATE
 function update(){
- ctx.fillStyle="rgba(2,6,23,0.4)";
+ ctx.fillStyle="rgba(2,6,23,0.3)";
  ctx.fillRect(0,0,canvas.width,canvas.height);
 
  drawStars();
@@ -199,22 +239,23 @@ function update(){
 
  if(playing){
   obstacles.forEach(o=>{
-   o.y += speed;
+   o.y+=speed;
 
-   if(player.y < o.y+20 && player.y > o.y){
-    if(player.x < o.x || player.x > o.x+o.width){
+   if(player.y<o.y+20 && player.y>o.y){
+    if(player.x<o.x || player.x>o.x+o.width){
      gameOver();
     }
    }
 
-   if(o.y > canvas.height){
+   if(o.y>canvas.height){
     score++;
-    speed += 0.1;
-    document.getElementById("score").innerText = score;
+    speed+=0.1;
+    beep(500);
+    document.getElementById("score").innerText=score;
    }
   });
 
-  obstacles = obstacles.filter(o=>o.y<canvas.height);
+  obstacles=obstacles.filter(o=>o.y<canvas.height);
  }
 
  requestAnimationFrame(update);
@@ -230,6 +271,8 @@ function tap(){
  player.targetX = player.targetX < canvas.width/2
   ? canvas.width*0.75
   : canvas.width*0.25;
+
+ beep(800);
 }
 
 // START
@@ -239,6 +282,7 @@ function startGame(){
  speed=4;
  obstacles=[];
  particles=[];
+ trail=[];
 
  resetPlayer();
 
@@ -247,11 +291,10 @@ function startGame(){
 }
 
 // EVENTS
-canvas.addEventListener("touchstart", tap);
-canvas.addEventListener("mousedown", tap);
+canvas.addEventListener("touchstart",tap);
+canvas.addEventListener("mousedown",tap);
 
-// SPAWN
-setInterval(()=>{ if(playing) spawn(); }, 1000);
+setInterval(()=>{ if(playing) spawn(); },900);
 
 resetPlayer();
 update();
