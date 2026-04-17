@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Tap Dodge Ultra</title>
+<title>Tap Dodge Pro</title>
 
 <style>
 html, body{
@@ -11,7 +11,6 @@ html, body{
  padding:0;
  overflow:hidden;
  font-family:Arial;
- background:#020617;
 }
 
 /* BACKGROUND */
@@ -38,36 +37,23 @@ html, body{
  font-size:48px;
  color:#22c55e;
  text-shadow:0 0 30px #22c55e;
- animation:pulse 2s infinite;
-}
-
-@keyframes pulse{
- 0%{transform:scale(1);}
- 50%{transform:scale(1.05);}
- 100%{transform:scale(1);}
+ margin-bottom:30px;
 }
 
 .btn{
- width:240px;
- padding:16px;
- margin:12px;
+ width:220px;
+ padding:15px;
+ margin:10px;
  font-size:18px;
  border:none;
  border-radius:14px;
  color:#22c55e;
- background:rgba(34,197,94,0.15);
- border:1px solid rgba(34,197,94,0.5);
+ background:rgba(34,197,94,0.2);
+ border:1px solid #22c55e;
  backdrop-filter: blur(10px);
- transition:0.2s;
 }
 
-.btn:active{
- transform:scale(0.95);
- background:#22c55e;
- color:#000;
-}
-
-/* TOP UI */
+/* GAME UI */
 #top{
  position:absolute;
  top:0;
@@ -84,17 +70,6 @@ canvas#game{
  position:absolute;
  z-index:1;
 }
-
-/* FLASH EFFECT */
-#flash{
- position:absolute;
- width:100%;
- height:100%;
- background:#fff;
- opacity:0;
- pointer-events:none;
- z-index:5;
-}
 </style>
 </head>
 
@@ -105,8 +80,6 @@ canvas#game{
 <div id="menu">
  <div class="title">TAP DODGE</div>
  <button class="btn" onclick="startGame()">NEW GAME</button>
- <button class="btn" onclick="startCrazy()">CRAZY MODE</button>
- <button class="btn" onclick="toggleSound()">SOUND</button>
 </div>
 
 <div id="top">
@@ -114,12 +87,10 @@ canvas#game{
  <div>Best: <span id="best">0</span></div>
 </div>
 
-<div id="flash"></div>
-
 <canvas id="game"></canvas>
 
 <script>
-// ===== RESIZE =====
+// ===== CANVAS =====
 const bg = document.getElementById("bg");
 const bgCtx = bg.getContext("2d");
 const canvas = document.getElementById("game");
@@ -132,31 +103,15 @@ function resize(){
 resize();
 window.addEventListener("resize", resize);
 
-// ===== SOUND =====
-let sound=true;
-let audioCtx=new (window.AudioContext||window.webkitAudioContext)();
-
-function beep(f){
- if(!sound) return;
- let o=audioCtx.createOscillator();
- let g=audioCtx.createGain();
- o.connect(g); g.connect(audioCtx.destination);
- o.frequency.value=f;
- o.start();
- g.gain.exponentialRampToValueAtTime(0.0001,audioCtx.currentTime+0.2);
-}
-
-function toggleSound(){
- sound=!sound;
-}
-
-// ===== BACKGROUND =====
-let stars=[];
-for(let i=0;i<100;i++){
- stars.push({
+// ===== BEAUTIFUL BACKGROUND =====
+let circles=[];
+for(let i=0;i<6;i++){
+ circles.push({
   x:Math.random()*innerWidth,
   y:Math.random()*innerHeight,
-  speed:Math.random()*2+0.5
+  r:Math.random()*200+100,
+  dx:(Math.random()-0.5)*0.5,
+  dy:(Math.random()-0.5)*0.5
  });
 }
 
@@ -164,11 +119,21 @@ function drawBG(){
  bgCtx.fillStyle="#020617";
  bgCtx.fillRect(0,0,bg.width,bg.height);
 
- stars.forEach(s=>{
-  bgCtx.fillStyle="#22c55e";
-  bgCtx.fillRect(s.x,s.y,2,2);
-  s.y+=s.speed;
-  if(s.y>bg.height)s.y=0;
+ circles.forEach(c=>{
+  let g = bgCtx.createRadialGradient(c.x,c.y,0,c.x,c.y,c.r);
+  g.addColorStop(0,"rgba(34,197,94,0.2)");
+  g.addColorStop(1,"transparent");
+
+  bgCtx.fillStyle=g;
+  bgCtx.beginPath();
+  bgCtx.arc(c.x,c.y,c.r,0,Math.PI*2);
+  bgCtx.fill();
+
+  c.x+=c.dx;
+  c.y+=c.dy;
+
+  if(c.x<0||c.x>bg.width) c.dx*=-1;
+  if(c.y<0||c.y>bg.height) c.dy*=-1;
  });
 
  requestAnimationFrame(drawBG);
@@ -176,30 +141,22 @@ function drawBG(){
 drawBG();
 
 // ===== GAME =====
-let player, obstacles, particles, score, best, speed, playing;
+let player, obstacles=[], score=0, best=0, speed=4, playing=false;
 
 // PLAYER
 class Player{
  constructor(){
-  this.x=canvas.width/2;
-  this.targetX=this.x;
-  this.y=canvas.height-120;
-  this.trail=[];
+  this.x = canvas.width/2;
+  this.targetX = this.x;
+  this.y = canvas.height-120;
  }
 
  update(){
-  this.x+=(this.targetX-this.x)*0.2;
-  this.trail.push({x:this.x,y:this.y});
-  if(this.trail.length>8) this.trail.shift();
+  this.x += (this.targetX-this.x)*0.2;
  }
 
  draw(){
-  ctx.strokeStyle="#22c55e";
-  ctx.beginPath();
-  this.trail.forEach(p=>ctx.lineTo(p.x,p.y));
-  ctx.stroke();
-
-  ctx.shadowBlur=25;
+  ctx.shadowBlur=20;
   ctx.shadowColor="#22c55e";
 
   ctx.fillStyle="#22c55e";
@@ -228,81 +185,31 @@ class Obstacle{
  update(){ this.y+=speed; }
 
  draw(){
-  ctx.shadowBlur=15;
-  ctx.shadowColor="#ef4444";
   ctx.fillStyle="#ef4444";
   ctx.fillRect(0,this.y,this.x,20);
   ctx.fillRect(this.x+this.gap,this.y,canvas.width-(this.x+this.gap),20);
-  ctx.shadowBlur=0;
  }
 }
 
-// EFFECTS
-function explode(){
- for(let i=0;i<30;i++){
-  particles.push({
-   x:player.x,
-   y:player.y,
-   dx:(Math.random()-0.5)*10,
-   dy:(Math.random()-0.5)*10,
-   life:30
-  });
- }
-}
+// START GAME
+function startGame(){
+ player = new Player();
+ obstacles = [];
+ score = 0;
+ speed = 4;
+ playing = true;
 
-function drawParticles(){
- ctx.fillStyle="#fff";
- particles.forEach(p=>{
-  ctx.fillRect(p.x,p.y,2,2);
-  p.x+=p.dx;
-  p.y+=p.dy;
-  p.life--;
- });
- particles=particles.filter(p=>p.life>0);
-}
+ best = localStorage.getItem("best") || 0;
 
-// FLASH
-function flash(){
- let f=document.getElementById("flash");
- f.style.opacity=0.8;
- setTimeout(()=>f.style.opacity=0,100);
-}
-
-// INIT
-function init(){
- player=new Player();
- obstacles=[];
- particles=[];
- score=0;
- speed=4;
- best=localStorage.getItem("best")||0;
- playing=true;
-
+ document.getElementById("menu").style.display="none";
+ document.getElementById("top").style.display="flex";
  document.getElementById("score").innerText=score;
  document.getElementById("best").innerText=best;
-}
-
-// START
-function startGame(){
- init();
- document.getElementById("menu").style.display="none";
- document.getElementById("top").style.display="flex";
-}
-
-function startCrazy(){
- init();
- speed=7;
- document.getElementById("menu").style.display="none";
- document.getElementById("top").style.display="flex";
 }
 
 // GAME OVER
 function gameOver(){
  playing=false;
- explode();
- flash();
- beep(100);
- navigator.vibrate?.(100);
 
  if(score>best){
   best=score;
@@ -334,22 +241,20 @@ function loop(){
    if(o.y>canvas.height){
     score++;
     speed+=0.1;
-    beep(400);
     document.getElementById("score").innerText=score;
    }
   });
 
-  obstacles=obstacles.filter(o=>o.y<canvas.height);
+  obstacles = obstacles.filter(o=>o.y<canvas.height);
  }
 
- drawParticles();
  requestAnimationFrame(loop);
 }
 
 // SPAWN
 setInterval(()=>{
  if(playing) obstacles.push(new Obstacle());
-},900);
+},1000);
 
 // INPUT
 canvas.addEventListener("touchstart",()=>player?.move());
