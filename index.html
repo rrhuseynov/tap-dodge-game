@@ -11,46 +11,55 @@ html,body{
  padding:0;
  background:#000;
  font-family:Arial;
+ color:white;
+}
+
+/* 📱 MOBILE + DESKTOP LAYOUT */
+#wrapper{
  display:flex;
  justify-content:center;
  align-items:center;
  height:100vh;
- color:white;
+ gap:15px;
 }
 
-/* MAIN LAYOUT */
-#wrapper{
- display:flex;
- align-items:center;
- gap:20px;
+/* MOBILE STACK */
+@media (max-width:768px){
+ #wrapper{
+  flex-direction:column;
+  gap:10px;
+ }
 }
 
-/* SIDE PANELS */
+/* PANELS */
 .panel{
  background:#111;
- padding:15px;
- border-radius:15px;
- width:100px;
+ padding:10px;
+ border-radius:12px;
  text-align:center;
- box-shadow:0 0 15px rgba(255,255,255,0.1);
+ min-width:80px;
+ font-size:14px;
 }
 
 .panel div{
- margin:10px 0;
+ margin:5px 0;
 }
 
-/* GAME WINDOW */
+/* GAME */
 #gameBox{
  position:relative;
- border-radius:20px;
+ border-radius:15px;
  overflow:hidden;
- box-shadow:0 0 30px rgba(0,0,0,0.8);
+ box-shadow:0 0 20px rgba(0,0,0,0.7);
 }
 
-/* CANVAS */
+/* CANVAS SCALE */
 canvas{
  display:block;
  background:#020617;
+ width:90vw;
+ max-width:320px;
+ height:auto;
 }
 
 /* GAME OVER */
@@ -75,6 +84,7 @@ canvas{
 
 #gameOver h1{
  color:#ff4444;
+ font-size:32px;
 }
 </style>
 </head>
@@ -83,7 +93,7 @@ canvas{
 
 <div id="wrapper">
 
- <!-- LEFT -->
+ <!-- SCORE -->
  <div class="panel">
   <div>Score</div>
   <div id="score">0</div>
@@ -220,7 +230,6 @@ function loop(){
 
   obstacles=obstacles.filter(o=>o.y<canvas.height);
 
-  // UI update
   document.getElementById("score").innerText=score;
   document.getElementById("time").innerText=(time/60).toFixed(1);
   document.getElementById("speed").innerText=speed.toFixed(1);
@@ -234,9 +243,13 @@ setInterval(()=>{
  if(playing) obstacles.push(new Obstacle());
 },900);
 
-// INPUT
+// INPUT (mobile friendly)
+canvas.addEventListener("touchstart",(e)=>{
+ e.preventDefault();
+ input();
+});
+
 canvas.addEventListener("mousedown",input);
-canvas.addEventListener("touchstart",input);
 
 function input(){
  if(gameOverState){
