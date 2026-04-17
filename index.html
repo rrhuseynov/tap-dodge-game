@@ -6,7 +6,7 @@
 <title>Tap & Dodge</title>
 
 <style>
-html, body{
+html,body{
  margin:0;
  padding:0;
  overflow:hidden;
@@ -19,13 +19,11 @@ html, body{
  width:100%;
  height:100%;
  background:url("bg.png") center/cover no-repeat;
+ transition:0.3s;
 }
 
-#overlay{
- position:absolute;
- width:100%;
- height:100%;
- background:rgba(0,0,0,0.6);
+#bg.blur{
+ filter:blur(6px) brightness(0.6);
 }
 
 /* MENU */
@@ -40,7 +38,7 @@ html, body{
 }
 
 .card{
- background:#0b0b0b;
+ background:#111;
  padding:30px;
  border-radius:20px;
  text-align:center;
@@ -53,7 +51,32 @@ html, body{
  margin:8px 0;
  border:none;
  border-radius:30px;
- background:#f59e0b;
+ font-size:15px;
+}
+
+.main{background:#f59e0b;}
+.secondary{
+ background:transparent;
+ border:2px solid #f59e0b;
+ color:#f59e0b;
+}
+
+/* LEADERBOARD */
+#leaderboard{
+ position:absolute;
+ width:100%;
+ height:100%;
+ display:none;
+ justify-content:center;
+ align-items:center;
+ color:white;
+ z-index:4;
+}
+
+.board{
+ background:#000;
+ padding:20px;
+ border-radius:20px;
 }
 
 /* GAME OVER */
@@ -61,96 +84,70 @@ html, body{
  position:absolute;
  width:100%;
  height:100%;
- display:flex;
- flex-direction:column;
+ display:none;
  justify-content:center;
  align-items:center;
+ flex-direction:column;
  color:white;
  z-index:4;
- display:none;
 }
 
-#gameOver h1{
- font-size:50px;
- color:#ff4444;
-}
-
-.tap{
- margin-top:10px;
- color:#ccc;
-}
-
-/* TOP */
-#top{
- position:absolute;
- top:0;
- width:100%;
- display:flex;
- justify-content:space-between;
- padding:10px;
- color:white;
- display:none;
- z-index:4;
-}
-
-canvas{
- position:absolute;
- z-index:2;
-}
+canvas{position:absolute;}
 </style>
 </head>
 
 <body>
 
 <div id="bg"></div>
-<div id="overlay"></div>
 
 <!-- MENU -->
 <div id="menu">
  <div class="card">
-  <button class="btn" onclick="newGame()">NEW GAME</button>
+  <button class="btn main" onclick="startGame()">NEW GAME</button>
+  <button class="btn secondary" onclick="showLeaderboard()">LEADERBOARD</button>
+ </div>
+</div>
+
+<!-- LEADERBOARD -->
+<div id="leaderboard">
+ <div class="board">
+  <h2>Top Scores</h2>
+  <div id="scores"></div>
+  <button onclick="closeBoard()">Back</button>
  </div>
 </div>
 
 <!-- GAME OVER -->
 <div id="gameOver">
  <h1>GAME OVER</h1>
- <div class="tap">Tap to restart</div>
-</div>
-
-<!-- TOP -->
-<div id="top">
- <div>Score: <span id="score">0</span></div>
- <div>Best: <span id="best">0</span></div>
+ <p>Tap to restart</p>
 </div>
 
 <canvas id="game"></canvas>
 
 <script>
-const canvas = document.getElementById("game");
-const ctx = canvas.getContext("2d");
+const canvas=document.getElementById("game");
+const ctx=canvas.getContext("2d");
 
 function resize(){
- canvas.width = innerWidth;
- canvas.height = innerHeight;
+ canvas.width=innerWidth;
+ canvas.height=innerHeight;
 }
 resize();
-window.addEventListener("resize", resize);
+window.addEventListener("resize",resize);
 
-let player, obstacles=[], score=0, best=0, speed=4;
-let playing=false;
-let gameOverState=false;
+let player,obstacles,score,speed,playing,gameOverState,time=0;
 
 // PLAYER
 class Player{
  constructor(){
-  this.x = canvas.width/2;
-  this.targetX = this.x;
-  this.y = canvas.height-120;
+  this.x=canvas.width/2;
+  this.targetX=this.x;
+  this.y=canvas.height-120;
  }
 
  update(){
-  this.x += (this.targetX-this.x)*0.2;
+  this.x+=(this.targetX-this.x)*0.2;
  }
 
  draw(){
@@ -161,9 +158,9 @@ class Player{
  }
 
  move(){
-  this.targetX = this.targetX < canvas.width/2
-   ? canvas.width*0.75
-   : canvas.width*0.25;
+  this.targetX=this.targetX<canvas.width/2
+   ?canvas.width*0.75
+   :canvas.width*0.25;
  }
 }
 
@@ -175,52 +172,78 @@ class Obstacle{
   this.y=-30;
  }
 
- update(){ this.y+=speed; }
+ update(){this.y+=speed;}
 
  draw(){
-  let h=20;
-
-  let g = ctx.createLinearGradient(0,this.y,0,this.y+h);
+  let g=ctx.createLinearGradient(0,this.y,0,this.y+20);
   g.addColorStop(0,"#ff7a00");
   g.addColorStop(1,"#ff0055");
 
   ctx.fillStyle=g;
-  ctx.fillRect(0,this.y,this.x,h);
+  ctx.fillRect(0,this.y,this.x,20);
   ctx.fillRect(this.x+this.gap,this.y,
-   canvas.width-(this.x+this.gap),h);
+   canvas.width-(this.x+this.gap),20);
  }
 }
 
-function newGame(){
+// START
+function startGame(){
  player=new Player();
  obstacles=[];
  score=0;
  speed=4;
+ time=0;
  playing=true;
  gameOverState=false;
 
  document.getElementById("menu").style.display="none";
- document.getElementById("overlay").style.display="none";
- document.getElementById("top").style.display="flex";
- document.getElementById("gameOver").style.display="none";
+ document.getElementById("bg").classList.add("blur");
 }
 
+// GAME OVER
 function triggerGameOver(){
  playing=false;
  gameOverState=true;
 
- document.getElementById("gameOver").style.display="flex";
+ saveScore();
 
- if(score>best){
-  best=score;
-  localStorage.setItem("best",best);
- }
+ document.getElementById("gameOver").style.display="flex";
 }
 
+// SAVE SCORE
+function saveScore(){
+ let scores=JSON.parse(localStorage.getItem("scores")||"[]");
+ scores.push(score);
+ scores.sort((a,b)=>b-a);
+ scores=scores.slice(0,5);
+ localStorage.setItem("scores",JSON.stringify(scores));
+}
+
+// LEADERBOARD
+function showLeaderboard(){
+ document.getElementById("leaderboard").style.display="flex";
+
+ let scores=JSON.parse(localStorage.getItem("scores")||"[]");
+ document.getElementById("scores").innerHTML =
+  scores.map(s=>"<div>"+s+"</div>").join("");
+}
+
+function closeBoard(){
+ document.getElementById("leaderboard").style.display="none";
+}
+
+// LOOP
 function loop(){
  ctx.clearRect(0,0,canvas.width,canvas.height);
 
  if(playing){
+  time++;
+
+  // ⚡ ускорение каждые ~2 сек
+  if(time%120==0){
+   speed+=0.5;
+  }
+
   player.update();
   player.draw();
 
@@ -236,28 +259,28 @@ function loop(){
 
    if(o.y>canvas.height){
     score++;
-    speed+=0.1;
-    document.getElementById("score").innerText=score;
    }
   });
 
-  obstacles = obstacles.filter(o=>o.y<canvas.height);
+  obstacles=obstacles.filter(o=>o.y<canvas.height);
  }
 
  requestAnimationFrame(loop);
 }
 
+// SPAWN
 setInterval(()=>{
- if(playing) obstacles.push(new Obstacle());
+ if(playing)obstacles.push(new Obstacle());
 },900);
 
 // INPUT
-canvas.addEventListener("mousedown",handleInput);
-canvas.addEventListener("touchstart",handleInput);
+canvas.addEventListener("mousedown",input);
+canvas.addEventListener("touchstart",input);
 
-function handleInput(){
+function input(){
  if(gameOverState){
-  newGame();
+  document.getElementById("gameOver").style.display="none";
+  startGame();
  }else if(playing){
   player.move();
  }
