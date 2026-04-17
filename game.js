@@ -3,20 +3,36 @@ function show(id) {
   document.getElementById(id).classList.add('active');
 }
 
-/* welcome */
-window.onload = function () {
+window.onload = () => {
   setTimeout(() => show('menu'), 1500);
 };
 
-/* FIX START */
-function goStart() {
-  show('game_start');
+/* ===== MENU CLICK ПО КООРДИНАТАМ ===== */
+function menuClick(e) {
+  let y = e.clientY / window.innerHeight;
+
+  if (y > 0.40 && y < 0.50) {
+    show('game_start'); // START
+  }
+  else if (y > 0.50 && y < 0.60) {
+    show('shop');
+  }
+  else if (y > 0.60 && y < 0.70) {
+    show('appearance_ball');
+  }
+  else if (y > 0.70 && y < 0.80) {
+    show('leaderboard');
+  }
 }
 
-/* FIX TAP TO START */
+/* ===== START ===== */
 function startFromTap() {
   show('game');
   startGame();
+}
+
+function backMenu() {
+  show('menu');
 }
 
 /* ===== GAME ===== */
@@ -31,11 +47,9 @@ function resize() {
   canvas.width = canvas.offsetWidth;
   canvas.height = canvas.offsetHeight;
 }
-window.addEventListener('resize', resize);
 
 function startGame() {
   resize();
-
   running = true;
 
   ball = {
@@ -46,18 +60,16 @@ function startGame() {
   };
 
   obstacles = [];
-
   spawnObstacle();
+
   requestAnimationFrame(loop);
 }
 
-/* control */
 document.addEventListener('click', () => {
   if (!running) return;
   ball.dx = ball.dx === 0 ? 4 : -ball.dx;
 });
 
-/* obstacles */
 function spawnObstacle() {
   if (!running) return;
 
@@ -72,7 +84,6 @@ function spawnObstacle() {
   setTimeout(spawnObstacle, 900);
 }
 
-/* loop */
 function loop() {
   if (!running) return;
 
@@ -84,7 +95,6 @@ function loop() {
   requestAnimationFrame(loop);
 }
 
-/* ball */
 function drawBall() {
   ball.x += ball.dx;
 
@@ -97,7 +107,6 @@ function drawBall() {
   ctx.fill();
 }
 
-/* obstacles */
 function updateObstacles() {
   obstacles.forEach(o => {
     o.y += o.speed;
@@ -112,7 +121,8 @@ function updateObstacles() {
       ball.y - ball.r < o.y + o.h
     ) {
       running = false;
-      document.getElementById('continueBox').classList.remove('hidden');
+      alert("GAME OVER");
+      show('menu');
     }
   });
 }
