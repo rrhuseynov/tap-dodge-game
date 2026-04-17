@@ -13,23 +13,24 @@ html, body{
  font-family:Arial;
 }
 
-/* 🌆 CYBERPUNK BACKGROUND */
+/* 🔥 ГАРАНТИРОВАННЫЙ ФОН (градиент + неон) */
 #bg{
  position:absolute;
  width:100%;
  height:100%;
- background:url("https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=1600") center/cover no-repeat;
- z-index:0;
+ background:
+ radial-gradient(circle at 30% 30%, rgba(0,255,200,0.15), transparent),
+ radial-gradient(circle at 70% 70%, rgba(0,150,255,0.15), transparent),
+ linear-gradient(120deg,#020617,#0f172a,#020617);
 }
 
-/* 🌫 BLUR + DARK */
-#bg::after{
- content:"";
+/* 🌫 МЯГКИЙ BLUR (не убивает фон) */
+#overlay{
  position:absolute;
  width:100%;
  height:100%;
- backdrop-filter:blur(6px);
- background:rgba(0,0,0,0.5);
+ backdrop-filter: blur(3px);
+ background:rgba(0,0,0,0.3);
 }
 
 /* MENU */
@@ -60,7 +61,7 @@ html, body{
  font-size:18px;
 }
 
-/* TOP UI */
+/* UI */
 #top{
  position:absolute;
  top:0;
@@ -83,6 +84,7 @@ canvas{
 <body>
 
 <div id="bg"></div>
+<div id="overlay"></div>
 
 <div id="menu">
  <div class="title">TAP DODGE</div>
@@ -107,7 +109,6 @@ function resize(){
 resize();
 window.addEventListener("resize", resize);
 
-// GAME
 let player, obstacles=[], score=0, best=0, speed=4, playing=false;
 
 class Player{
@@ -165,13 +166,8 @@ function startGame(){
 
  best = localStorage.getItem("best") || 0;
 
- // 🔥 убираем blur-меню эффект
- document.getElementById("bg").style.filter="none";
-
  document.getElementById("menu").style.display="none";
  document.getElementById("top").style.display="flex";
- document.getElementById("score").innerText=score;
- document.getElementById("best").innerText=best;
 }
 
 function gameOver(){
@@ -182,20 +178,12 @@ function gameOver(){
   localStorage.setItem("best",best);
  }
 
- // 🔥 возвращаем blur
- document.getElementById("bg").style.filter="blur(6px)";
-
  document.getElementById("menu").style.display="flex";
  document.getElementById("top").style.display="none";
 }
 
 function loop(){
- // 🎮 чистый фон во время игры
- let g = ctx.createLinearGradient(0,0,0,canvas.height);
- g.addColorStop(0,"#020617");
- g.addColorStop(1,"#0f172a");
- ctx.fillStyle = g;
- ctx.fillRect(0,0,canvas.width,canvas.height);
+ ctx.clearRect(0,0,canvas.width,canvas.height);
 
  if(playing){
   player.update();
@@ -214,7 +202,6 @@ function loop(){
    if(o.y>canvas.height){
     score++;
     speed+=0.1;
-    document.getElementById("score").innerText=score;
    }
   });
 
@@ -228,8 +215,8 @@ setInterval(()=>{
  if(playing) obstacles.push(new Obstacle());
 },1000);
 
-canvas.addEventListener("touchstart",()=>player?.move());
 canvas.addEventListener("mousedown",()=>player?.move());
+canvas.addEventListener("touchstart",()=>player?.move());
 
 loop();
 </script>
