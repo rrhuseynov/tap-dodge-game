@@ -1,20 +1,19 @@
-// ===== NAVIGATION =====
+// ===== NAV =====
 function show(id) {
-  document.querySelectorAll('.screen').forEach(s => {
-    s.classList.remove('active');
-  });
-
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
 
   if (id === 'game') startGame();
 }
 
-// welcome → menu
+// welcome
 window.onload = function () {
-  setTimeout(() => {
-    show('menu');
-  }, 2000);
+  setTimeout(() => show('menu'), 2000);
 };
+
+// ===== STORAGE =====
+let best = localStorage.getItem("best") || 0;
+let coinCount = localStorage.getItem("coins") || 120;
 
 // ===== GAME =====
 let canvas = document.getElementById('gameCanvas');
@@ -22,22 +21,20 @@ let ctx = canvas.getContext('2d');
 
 let ball, obstacles, coins;
 let score = 0;
-let coinCount = 120;
 let lives = 3;
 let speedMultiplier = 1;
 let gameRunning = false;
 
-// resize canvas
+// resize
 function resize() {
   canvas.width = canvas.offsetWidth;
   canvas.height = canvas.offsetHeight;
 }
 window.addEventListener('resize', resize);
 
-// start game
+// start
 function startGame() {
   gameRunning = true;
-
   resize();
 
   ball = {
@@ -53,6 +50,8 @@ function startGame() {
   lives = 3;
   speedMultiplier = 1;
 
+  updateUI();
+
   spawnObstacle();
   spawnCoin();
 
@@ -65,7 +64,7 @@ document.addEventListener('click', () => {
   ball.dx = ball.dx === 0 ? 4 : -ball.dx;
 });
 
-// spawn obstacles
+// spawn
 function spawnObstacle() {
   if (!gameRunning) return;
 
@@ -80,7 +79,6 @@ function spawnObstacle() {
   setTimeout(spawnObstacle, 900);
 }
 
-// spawn coins
 function spawnCoin() {
   if (!gameRunning) return;
 
@@ -106,8 +104,14 @@ function loop() {
 
   score++;
 
-  // ускорение
+  if (score > best) {
+    best = score;
+    localStorage.setItem("best", best);
+  }
+
   if (score % 300 === 0) speedMultiplier += 0.2;
+
+  updateUI();
 
   requestAnimationFrame(loop);
 }
@@ -137,7 +141,6 @@ function updateObstacles() {
     ctx.fillStyle = '#7CFF6B';
     ctx.fillRect(o.x, o.y, o.w, o.h);
 
-    // collision
     if (
       ball.x > o.x &&
       ball.x < o.x + o.w &&
@@ -166,11 +169,12 @@ function updateCoins() {
     if (dist < ball.r + c.r) {
       coins.splice(i, 1);
       coinCount += 10;
+      localStorage.setItem("coins", coinCount);
     }
   });
 }
 
-// life system
+// lives
 function loseLife() {
   lives--;
 
@@ -186,6 +190,16 @@ function resetBall() {
   ball.dx = 0;
 }
 
+// UI
+function updateUI() {
+  document.getElementById('scoreText').innerText = score;
+  document.getElementById('coinText').innerText = coinCount;
+
+  let hearts = '';
+  for (let i = 0; i < lives; i++) hearts += '❤️';
+  document.getElementById('livesText').innerText = hearts;
+}
+
 // game over
 function gameOver() {
   gameRunning = false;
@@ -196,6 +210,7 @@ function gameOver() {
 function buyLife() {
   if (coinCount >= 200) {
     coinCount -= 200;
+    localStorage.setItem("coins", coinCount);
     lives = 1;
     resumeGame();
   }
