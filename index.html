@@ -14,8 +14,23 @@ html, body{
  background:#020617;
 }
 
-/* LOADING SCREEN */
+/* LOADING */
 #loading{
+ position:absolute;
+ width:100%;
+ height:100%;
+ display:flex;
+ justify-content:center;
+ align-items:center;
+ flex-direction:column;
+ color:#22c55e;
+ font-size:28px;
+ background:#020617;
+ z-index:10;
+}
+
+/* MENU */
+#menu{
  position:absolute;
  width:100%;
  height:100%;
@@ -23,50 +38,39 @@ html, body{
  flex-direction:column;
  justify-content:center;
  align-items:center;
- background:#020617;
- color:#22c55e;
- font-size:28px;
+ color:#fff;
  z-index:5;
+ display:none;
 }
 
-#bar{
- width:200px;
- height:6px;
- background:#111;
- margin-top:20px;
+.title{
+ font-size:40px;
+ color:#22c55e;
+ text-shadow:0 0 20px #22c55e;
+ margin-bottom:40px;
+}
+
+.btn{
+ padding:15px 40px;
+ font-size:20px;
+ border:none;
  border-radius:10px;
- overflow:hidden;
-}
-
-#progress{
- width:0%;
- height:100%;
  background:#22c55e;
+ color:#000;
+ margin:10px;
 }
 
-/* GAME UI */
+/* TOP UI */
 #top{
  position:absolute;
  top:0;
  width:100%;
  display:flex;
  justify-content:space-between;
- padding:12px 15px;
+ padding:10px;
  color:#fff;
- backdrop-filter: blur(10px);
- background:rgba(0,0,0,0.3);
- z-index:2;
-}
-
-#menu{
- position:absolute;
- top:50%;
- left:50%;
- transform:translate(-50%,-50%);
- color:#22c55e;
- font-size:28px;
- text-align:center;
- z-index:2;
+ display:none;
+ z-index:3;
 }
 
 canvas{
@@ -79,17 +83,18 @@ canvas{
 
 <body>
 
-<div id="loading">
- <div>LOADING...</div>
- <div id="bar"><div id="progress"></div></div>
+<div id="loading">Loading...</div>
+
+<div id="menu">
+ <div class="title">TAP DODGE</div>
+ <button class="btn" onclick="startGame()">PLAY</button>
+ <button class="btn" onclick="toggleSound()">SOUND</button>
 </div>
 
 <div id="top">
  <div>Score: <span id="score">0</span></div>
  <div>Best: <span id="best">0</span></div>
 </div>
-
-<div id="menu">TAP TO START</div>
 
 <canvas id="game"></canvas>
 
@@ -104,17 +109,17 @@ function resize(){
 resize();
 window.addEventListener("resize", resize);
 
-// LOADING ANIMATION
-let progress = 0;
-let loadInterval = setInterval(()=>{
- progress += 5;
- document.getElementById("progress").style.width = progress + "%";
+// LOADING → MENU
+setTimeout(()=>{
+ document.getElementById("loading").style.display="none";
+ document.getElementById("menu").style.display="flex";
+},1500);
 
- if(progress >= 100){
-  clearInterval(loadInterval);
-  document.getElementById("loading").style.display = "none";
- }
-}, 80);
+// SOUND
+let sound = true;
+function toggleSound(){
+ sound = !sound;
+}
 
 // STARS
 let stars=[];
@@ -183,8 +188,8 @@ function gameOver(){
   localStorage.setItem("best",best);
  }
 
- document.getElementById("menu").innerText="GAME OVER\nTAP TO RESTART";
- document.getElementById("menu").style.display="block";
+ document.getElementById("menu").style.display="flex";
+ document.getElementById("top").style.display="none";
 }
 
 // UPDATE
@@ -220,11 +225,11 @@ function update(){
 }
 
 // TAP
+canvas.addEventListener("touchstart",tap);
+canvas.addEventListener("mousedown",tap);
+
 function tap(){
- if(!playing){
-  startGame();
-  return;
- }
+ if(!playing) return;
 
  player.targetX = player.targetX < canvas.width/2
   ? canvas.width*0.75
@@ -240,14 +245,12 @@ function startGame(){
 
  resetPlayer();
 
- document.getElementById("score").innerText=score;
  document.getElementById("menu").style.display="none";
+ document.getElementById("top").style.display="flex";
+ document.getElementById("score").innerText=score;
 }
 
-// EVENTS
-canvas.addEventListener("touchstart",tap);
-canvas.addEventListener("mousedown",tap);
-
+// LOOP
 setInterval(()=>{ if(playing) spawn(); },1000);
 
 resetPlayer();
