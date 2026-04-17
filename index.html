@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>Tap Dodge</title>
+<title>Tap Dodge Pro</title>
 
 <style>
 html, body{
@@ -28,8 +28,9 @@ html, body{
  top:50%;
  left:50%;
  transform:translate(-50%, -50%);
- font-size:24px;
- opacity:0.8;
+ font-size:26px;
+ color:#22c55e;
+ text-shadow:0 0 10px #22c55e;
 }
 
 canvas{
@@ -39,7 +40,6 @@ canvas{
  border-radius:12px;
  width:90vw;
  max-width:350px;
- height:auto;
 }
 </style>
 </head>
@@ -59,13 +59,23 @@ canvas{
 const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
 
-let player = {
- x:150,
- targetX:150,
- y:400
-};
+let audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
+function beep(freq){
+ let o = audioCtx.createOscillator();
+ let g = audioCtx.createGain();
+ o.connect(g); g.connect(audioCtx.destination);
+ o.frequency.value = freq;
+ o.start();
+ g.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.2);
+}
+
+// PLAYER
+let player = { x:150, targetX:150, y:400 };
+
+// STATE
 let obstacles = [];
+let particles = [];
 let score = 0;
 let best = localStorage.getItem("dodgeBest") || 0;
 let speed = 4;
@@ -73,64 +83,92 @@ let playing = false;
 
 document.getElementById("best").innerText = best;
 
-// СПАВН
+// SPAWN
 function spawn(){
  let gap = 80;
  let x = Math.random()*(300-gap);
-
- obstacles.push({
-  x: x,
-  width: gap,
-  y: -20
- });
+ obstacles.push({ x, width:gap, y:-20 });
 }
 
-// ИГРОК
+// PLAYER DRAW
 function drawPlayer(){
- player.x += (player.targetX - player.x)*0.2;
+ player.x += (player.targetX - player.x)*0.25;
+
+ ctx.shadowBlur = 15;
+ ctx.shadowColor = "#22c55e";
 
  ctx.fillStyle = "#22c55e";
  ctx.beginPath();
  ctx.arc(player.x, player.y, 10, 0, Math.PI*2);
  ctx.fill();
+
+ ctx.shadowBlur = 0;
 }
 
-// ПРЕПЯТСТВИЯ
+// OBSTACLES
 function drawObstacles(){
  ctx.fillStyle = "#ef4444";
-
  obstacles.forEach(o=>{
-  ctx.fillRect(0, o.y, o.x, 20);
-  ctx.fillRect(o.x + o.width, o.y, 300 - (o.x+o.width), 20);
+  ctx.fillRect(0,o.y,o.x,20);
+  ctx.fillRect(o.x+o.width,o.y,300-(o.x+o.width),20);
  });
+}
+
+// PARTICLES
+function spawnParticles(){
+ for(let i=0;i<20;i++){
+  particles.push({
+   x:player.x,
+   y:player.y,
+   dx:(Math.random()-0.5)*6,
+   dy:(Math.random()-0.5)*6,
+   life:30
+  });
+ }
+}
+
+function drawParticles(){
+ ctx.fillStyle="#fff";
+ particles.forEach(p=>{
+  ctx.fillRect(p.x,p.y,2,2);
+  p.x+=p.dx;
+  p.y+=p.dy;
+  p.life--;
+ });
+ particles = particles.filter(p=>p.life>0);
 }
 
 // GAME OVER
 function gameOver(){
  playing = false;
+ beep(120);
+ navigator.vibrate?.(100);
 
- if(score > best){
-  best = score;
-  localStorage.setItem("dodgeBest", best);
+ spawnParticles();
+
+ if(score>best){
+  best=score;
+  localStorage.setItem("dodgeBest",best);
  }
 
- document.getElementById("menu").innerText = "GAME OVER\nTAP TO RESTART";
- document.getElementById("menu").style.display = "block";
+ document.getElementById("menu").innerText="GAME OVER\nTAP TO RESTART";
+ document.getElementById("menu").style.display="block";
 }
 
-// ОБНОВЛЕНИЕ
+// UPDATE
 function update(){
  ctx.clearRect(0,0,300,500);
 
  drawPlayer();
  drawObstacles();
+ drawParticles();
 
  if(playing){
   obstacles.forEach(o=>{
    o.y += speed;
 
    if(player.y < o.y+20 && player.y > o.y){
-    if(player.x < o.x || player.x > o.x + o.width){
+    if(player.x < o.x || player.x > o.x+o.width){
      gameOver();
     }
    }
@@ -138,11 +176,12 @@ function update(){
    if(o.y > 500){
     score++;
     speed += 0.1;
-    document.getElementById("score").innerText = score;
+    beep(400);
+    document.getElementById("score").innerText=score;
    }
   });
 
-  obstacles = obstacles.filter(o=>o.y < 500);
+  obstacles = obstacles.filter(o=>o.y<500);
  }
 
  requestAnimationFrame(update);
@@ -155,7 +194,8 @@ function tap(){
   return;
  }
 
- player.targetX = player.targetX === 80 ? 220 : 80;
+ player.targetX = player.targetX===80 ? 220 : 80;
+ beep(800);
 }
 
 // START
@@ -164,6 +204,7 @@ function startGame(){
  score = 0;
  speed = 4;
  obstacles = [];
+ particles = [];
 
  player.x = 150;
  player.targetX = 150;
@@ -177,9 +218,7 @@ canvas.addEventListener("touchstart", tap);
 canvas.addEventListener("mousedown", tap);
 
 // SPAWN LOOP
-setInterval(()=>{
- if(playing) spawn();
-}, 1000);
+setInterval(()=>{ if(playing) spawn(); }, 900);
 
 update();
 </script>
