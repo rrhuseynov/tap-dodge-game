@@ -7,26 +7,22 @@ window.onload = () => {
   setTimeout(() => {
     show('menu');
     renderShop();
-  }, 1200);
+  }, 1000);
 };
-
-/* SHOP */
-
-let coins = 500;
 
 const shopData = [
   {
-    img: "assets/bag.png",
+    img: "assets/bag.jpg",
     amount: 1000,
     price: 180
   },
   {
-    img: "assets/chest.png",
+    img: "assets/chest.jpg",
     amount: 5000,
     price: 700
   },
   {
-    img: "assets/chest_gems.png",
+    img: "assets/chest_gems.jpg",
     amount: 1200,
     price: 1200
   }
@@ -44,8 +40,8 @@ function renderShop() {
       <img src="${item.img}" class="shop-icon">
       <div class="shop-text">+${item.amount}</div>
 
-      <img src="assets/price_btn.png" class="price-btn">
-      <img src="assets/coin.png" class="coin-icon">
+      <img src="assets/price_btn.jpg" class="price-btn">
+      <img src="assets/coin.jpg" class="coin-icon">
       <div class="price-text">${item.price}</div>
     `;
 
