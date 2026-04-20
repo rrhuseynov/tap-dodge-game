@@ -1,3 +1,4 @@
+<!-- index.html -->
 <!DOCTYPE html>
 <html>
 <head>
@@ -5,8 +6,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Tap Dodge</title>
 
-<!-- cache-bust -->
-<link rel="stylesheet" href="./style.css?v=7">
+<link rel="stylesheet" href="style.css">
 </head>
 
 <body>
@@ -21,26 +21,23 @@
   <img src="assets/main_menu.PNG" class="bg">
 
   <div class="menu-buttons">
-    <button id="btnStart">START</button>
-    <button id="btnShop">SHOP</button>
+    <img src="assets/start.png" id="startBtn" class="menu-img-btn">
+    <img src="assets/shop.png" id="shopBtn" class="menu-img-btn">
+    <img src="assets/appearance.png" class="menu-img-btn">
+    <img src="assets/leaderboard.png" class="menu-img-btn">
   </div>
 </div>
 
 <!-- SHOP -->
 <div id="shop" class="screen">
   <img src="assets/shop.PNG" class="bg">
-  <div class="shop-container" id="shopItems"></div>
 
-  <!-- если нет back.png — будет текстовая кнопка -->
-  <div class="back-fallback" id="backBtn">BACK</div>
+  <div id="shopItems" class="shop-container"></div>
+
+  <div id="backBtn" class="back-btn">BACK</div>
 </div>
 
-<!-- GAME (пока пусто, чтобы не ломало) -->
-<div id="game" class="screen">
-  <img src="assets/game_start.png" class="bg">
-  <canvas id="gameCanvas"></canvas>
-</div>
+<script src="game.js"></script>
 
-<script src="./game.js?v=7"></script>
 </body>
 </html>
