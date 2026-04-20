@@ -1,112 +1,104 @@
+const menu = document.getElementById("menu");
+const game = document.getElementById("game");
+const shop = document.getElementById("shop");
+
+const startBtn = document.getElementById("startBtn");
+const shopBtn = document.getElementById("shopBtn");
+const backBtn = document.getElementById("backBtn");
+
+function showScreen(screen) {
+    menu.classList.remove("active");
+    game.classList.remove("active");
+    shop.classList.remove("active");
+    screen.classList.add("active");
+}
+
+// КНОПКИ
+startBtn.onclick = () => {
+    showScreen(game);
+    startGame();
+};
+
+shopBtn.onclick = () => showScreen(shop);
+backBtn.onclick = () => showScreen(menu);
+
+// ===== GAME =====
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 
 canvas.width = 280;
 canvas.height = 460;
 
-/* SCREENS */
-const screens = {
-    menu: document.getElementById("menu"),
-    game: document.getElementById("game"),
-    shop: document.getElementById("shop")
+let ball = {
+    x: 140,
+    y: 420,
+    size: 40
 };
 
-function showScreen(name) {
-    Object.values(screens).forEach(s => s.classList.remove("active"));
-    screens[name].classList.add("active");
-}
-
-/* BUTTONS */
-document.getElementById("startBtn").onclick = () => {
-    showScreen("game");
-    startGame();
-};
-
-document.getElementById("shopBtn").onclick = () => showScreen("shop");
-
-document.getElementById("appearanceBtn").onclick = () => alert("Soon");
-document.getElementById("leaderboardBtn").onclick = () => alert("Soon");
-
-document.getElementById("backBtn").onclick = () => showScreen("menu");
-
-/* GAME LOGIC */
-
-let ball = { x: 140, y: 400, size: 20, dx: 3 };
 let lines = [];
-let running = false;
+let speed = 3;
 
+// ЗАГРУЗКА КАРТИНОК
 const ballImg = new Image();
 ballImg.src = "assets/ball.png";
 
 const lineImg = new Image();
 lineImg.src = "assets/line.png";
 
-function startGame() {
-    ball.x = 140;
-    ball.y = 400;
-    lines = [];
-    running = true;
-}
+// УПРАВЛЕНИЕ
+canvas.addEventListener("touchmove", (e) => {
+    const rect = canvas.getBoundingClientRect();
+    ball.x = e.touches[0].clientX - rect.left;
+});
 
+// СОЗДАНИЕ ЛИНИЙ
 function spawnLine() {
-    const width = 100 + Math.random() * 80;
-
     lines.push({
-        x: Math.random() * (canvas.width - width),
+        x: Math.random() * (canvas.width - 120),
         y: -20,
-        width: width,
-        height: 12
+        width: 120,
+        height: 20
     });
 }
 
-function update() {
-    if (!running) return;
+// СТОЛКНОВЕНИЕ
+function isColliding(a, b) {
+    return a.x < b.x + b.width &&
+           a.x + a.size > b.x &&
+           a.y < b.y + b.height &&
+           a.y + a.size > b.y;
+}
 
-    ball.x += ball.dx;
+// ИГРА
+function startGame() {
+    lines = [];
+    gameLoop();
+}
 
-    if (ball.x < 0 || ball.x > canvas.width - ball.size) {
-        ball.dx *= -1;
-    }
+function gameLoop() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    if (Math.random() < 0.02) spawnLine();
+    // линии
+    if (Math.random() < 0.03) spawnLine();
 
-    lines.forEach(line => line.y += 3);
+    lines.forEach((line, i) => {
+        line.y += speed;
 
-    // collision
-    lines.forEach(line => {
-        if (
-            ball.x < line.x + line.width &&
-            ball.x + ball.size > line.x &&
-            ball.y < line.y + line.height &&
-            ball.y + ball.size > line.y
-        ) {
-            running = false;
-            setTimeout(() => {
-                alert("Game Over");
-                startGame();
-            }, 100);
+        ctx.drawImage(lineImg, line.x, line.y, line.width, line.height);
+
+        if (isColliding(ball, line)) {
+            alert("Game Over");
+            showScreen(menu);
+            return;
+        }
+
+        if (line.y > canvas.height) {
+            lines.splice(i, 1);
         }
     });
 
-    lines = lines.filter(l => l.y < canvas.height);
-}
-
-function draw() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-    // lines
-    lines.forEach(line => {
-        ctx.drawImage(lineImg, line.x, line.y, line.width, line.height);
-    });
-
-    // ball
+    // шар
     ctx.drawImage(ballImg, ball.x, ball.y, ball.size, ball.size);
-}
 
-function loop() {
-    update();
-    draw();
-    requestAnimationFrame(loop);
+    requestAnimationFrame(gameLoop);
 }
-
-loop();
