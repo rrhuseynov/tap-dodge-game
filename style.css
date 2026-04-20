@@ -1,86 +1,82 @@
 /* style.css */
 body {
-  margin: 0;
-  overflow: hidden;
-  font-family: Arial;
+  margin:0;
+  overflow:hidden;
 }
 
-/* screens */
 .screen {
-  display: none;
-  position: fixed;
-  width: 100vw;
-  height: 100vh;
+  display:none;
+  position:fixed;
+  width:100%;
+  height:100%;
 }
 
 .screen.active {
-  display: block;
+  display:block;
 }
 
 .bg {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
+  width:100%;
+  height:100%;
+  object-fit:cover;
 }
 
 /* MENU */
-.menu-buttons {
-  position: absolute;
-  top: 38%;
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 12px; /* ровный отступ */
+.menu {
+  position:absolute;
+  top:40%;
+  width:100%;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:12px;
 }
 
-.menu-btn {
-  width: 280px;
-  height: auto;
+.menu img {
+  width:260px;
+}
+
+/* SHOP */
+.shop {
+  position:absolute;
+  top:35%;
+  width:100%;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:20px;
+}
+
+.row {
+  width:85%;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+
+.row img:first-child {
+  width:120px;
+}
+
+.row img:last-child {
+  width:120px;
+}
+
+/* BACK */
+#backBtn {
+  position:absolute;
+  bottom:8%;
+  left:50%;
+  transform:translateX(-50%);
+  background:#3a7cff;
+  color:white;
+  padding:12px 40px;
+  border-radius:20px;
 }
 
 /* GAME */
 #gameCanvas {
-  width: 100%;
-  height: 100%;
-  background: black;
-}
-
-/* SHOP GRID */
-.shop-grid {
-  position: absolute;
-  top: 30%;
-  width: 100%;
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  justify-items: center;
-  gap: 25px 10px;
-}
-
-.shop-item {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 6px;
-}
-
-.shop-icon {
-  width: 70px;
-}
-
-.price-btn {
-  width: 90px;
-}
-
-/* BACK */
-.back-btn {
-  position: absolute;
-  bottom: 8%;
-  left: 50%;
-  transform: translateX(-50%);
-  background: linear-gradient(#4da6ff, #1c6cff);
-  padding: 14px 40px;
-  border-radius: 25px;
-  color: white;
-  font-weight: bold;
+  position:absolute;
+  top:0;
+  left:0;
 }
