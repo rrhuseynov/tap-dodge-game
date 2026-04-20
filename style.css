@@ -1,86 +1,53 @@
 /* RESET */
 body {
-  margin: 0;
-  overflow: hidden;
+    margin: 0;
+    overflow: hidden;
 }
 
 /* SCREENS */
 .screen {
-  display: none;
-  position: fixed;
-  width: 100%;
-  height: 100%;
+    display: none;
+    position: fixed;
+    width: 100%;
+    height: 100%;
 }
 
 .screen.active {
-  display: block;
+    display: block;
 }
 
 /* BACKGROUND */
 .bg {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
 }
 
 /* MENU */
 .menu {
-  position: absolute;
-  top: 38%;
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 12px;
+    position: absolute;
+    top: 38%;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
 }
 
 .menu-btn {
-  width: 260px;
-  display: block;
-}
-
-/* SHOP */
-.shop {
-  position: absolute;
-  top: 35%;
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 25px;
-}
-
-.row {
-  width: 85%;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.row img:first-child {
-  width: 120px;
-}
-
-.row img:last-child {
-  width: 120px;
-}
-
-/* BACK BUTTON */
-.back-btn {
-  position: absolute;
-  bottom: 8%;
-  left: 50%;
-  transform: translateX(-50%);
-  background: linear-gradient(#4da6ff, #1c6cff);
-  color: white;
-  padding: 14px 40px;
-  border-radius: 25px;
-  font-weight: bold;
+    width: 240px;
 }
 
 /* GAME */
 #gameCanvas {
-  position: absolute;
-  top: 0;
-  left: 0;
+    position: absolute;
+    top: 52%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+
+    width: 280px;
+    height: 460px;
+
+    border-radius: 25px;
 }
