@@ -1,5 +1,3 @@
-// game.js
-
 function show(id){
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
@@ -27,7 +25,7 @@ function init(){
 
 /* GAME */
 
-let canvas,ctx,player,blocks,gameOver;
+let canvas,ctx,player,blocks,gameOver=false;
 
 function startGame(){
 
@@ -75,7 +73,6 @@ function loop(){
     b.y+=5;
     ctx.fillRect(b.x,b.y,b.size,b.size);
 
-    // collision
     if(
       b.x < player.x + player.r &&
       b.x + b.size > player.x - player.r &&
@@ -93,7 +90,7 @@ function endGame(){
   gameOver = true;
 
   setTimeout(()=>{
-    const again = confirm("Game Over\nRestart?");
+    let again = confirm("Game Over\nRestart?");
     if(again){
       startGame();
     } else {
