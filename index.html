@@ -1,10 +1,12 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <meta charset="UTF-8">
-    <title>Dodge Game</title>
-    <link rel="stylesheet" href="style.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tap & Dodge</title>
+<link rel="stylesheet" href="style.css">
 </head>
+
 <body>
 
 <!-- MENU -->
@@ -25,6 +27,31 @@
     <canvas id="gameCanvas"></canvas>
 </div>
 
+<!-- SHOP -->
+<div id="shop" class="screen">
+    <img src="assets/shop.png" class="bg">
+
+    <div class="shop">
+        <div class="row">
+            <img src="assets/bag.png">
+            <img src="assets/price-100.png">
+        </div>
+
+        <div class="row">
+            <img src="assets/chest.png">
+            <img src="assets/price-300.png">
+        </div>
+
+        <div class="row">
+            <img src="assets/chest_gems.png">
+            <img src="assets/price-500.png">
+        </div>
+    </div>
+
+    <div id="backBtn" class="back-btn">BACK</div>
+</div>
+
 <script src="game.js"></script>
+
 </body>
 </html>
