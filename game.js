@@ -1,100 +1,117 @@
-function show(id){
-  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
-}
+// SCREENS
+const menu = document.getElementById("menu");
+const game = document.getElementById("game");
 
-window.onload = ()=>{
-  setTimeout(()=>{
-    show("menu");
-    init();
-  },700);
+// BUTTONS
+const startBtn = document.getElementById("startBtn");
+const shopBtn = document.getElementById("shopBtn");
+const appearanceBtn = document.getElementById("appearanceBtn");
+const leaderboardBtn = document.getElementById("leaderboardBtn");
+
+// CANVAS
+const canvas = document.getElementById("gameCanvas");
+const ctx = canvas.getContext("2d");
+
+canvas.width = 280;
+canvas.height = 460;
+
+// ASSETS
+const ballImg = new Image();
+ballImg.src = "assets/ball.png";
+
+const lineImg = new Image();
+lineImg.src = "assets/line.png";
+
+// PLAYER
+let player = {
+    x: canvas.width / 2,
+    y: canvas.height - 40,
+    radius: 12
 };
 
-function init(){
+// PLATFORMS
+let lines = [];
 
-  startBtn.onclick = ()=>{
-    show("game");
+// START GAME
+startBtn.onclick = () => {
+    menu.classList.remove("active");
+    game.classList.add("active");
     startGame();
-  };
+};
 
-  shopBtn.onclick = ()=> show("shop");
-  appearanceBtn.onclick = ()=> alert("Soon");
-  leaderboardBtn.onclick = ()=> alert("Soon");
-  backBtn.onclick = ()=> show("menu");
-}
+// OTHER BUTTONS
+shopBtn.onclick = () => alert("Shop soon");
+appearanceBtn.onclick = () => alert("Appearance soon");
+leaderboardBtn.onclick = () => alert("Leaderboard soon");
 
-/* GAME */
-
-let canvas,ctx,player,blocks,gameOver=false;
-
-function startGame(){
-
-  canvas = document.getElementById("gameCanvas");
-  ctx = canvas.getContext("2d");
-
-  canvas.width = innerWidth;
-  canvas.height = innerHeight;
-
-  player = {x:canvas.width/2,y:canvas.height-120,r:25};
-  blocks = [];
-  gameOver = false;
-
-  canvas.onclick = (e)=>{
-    player.x = e.clientX;
-  };
-
-  loop();
-}
-
-function loop(){
-
-  if(gameOver) return;
-
-  ctx.clearRect(0,0,canvas.width,canvas.height);
-
-  // player
-  ctx.fillStyle="lime";
-  ctx.beginPath();
-  ctx.arc(player.x,player.y,player.r,0,Math.PI*2);
-  ctx.fill();
-
-  // spawn
-  if(Math.random()<0.03){
-    blocks.push({
-      x:Math.random()*canvas.width,
-      y:-50,
-      size:40
+// SPAWN LINES
+function spawnLine() {
+    lines.push({
+        x: Math.random() * (canvas.width - 100),
+        y: -20,
+        width: 100,
+        height: 12
     });
-  }
-
-  ctx.fillStyle="red";
-
-  blocks.forEach(b=>{
-    b.y+=5;
-    ctx.fillRect(b.x,b.y,b.size,b.size);
-
-    if(
-      b.x < player.x + player.r &&
-      b.x + b.size > player.x - player.r &&
-      b.y < player.y + player.r &&
-      b.y + b.size > player.y - player.r
-    ){
-      endGame();
-    }
-  });
-
-  requestAnimationFrame(loop);
 }
 
-function endGame(){
-  gameOver = true;
+// DRAW PLAYER
+function drawPlayer() {
+    ctx.drawImage(
+        ballImg,
+        player.x - player.radius,
+        player.y - player.radius,
+        player.radius * 2,
+        player.radius * 2
+    );
+}
 
-  setTimeout(()=>{
-    let again = confirm("Game Over\nRestart?");
-    if(again){
-      startGame();
-    } else {
-      show("menu");
+// DRAW LINE (PNG)
+function drawLine(l) {
+    ctx.drawImage(lineImg, l.x, l.y, l.width, l.height);
+}
+
+// UPDATE LOOP
+function update() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    drawPlayer();
+
+    for (let l of lines) {
+        l.y += 3;
+        drawLine(l);
+
+        // COLLISION
+        if (
+            player.y + player.radius > l.y &&
+            player.y - player.radius < l.y + l.height &&
+            player.x > l.x &&
+            player.x < l.x + l.width
+        ) {
+            gameOver();
+            return;
+        }
     }
-  },100);
+
+    requestAnimationFrame(update);
+}
+
+// START
+function startGame() {
+    lines = [];
+
+    setInterval(spawnLine, 1200);
+
+    update();
+}
+
+// TOUCH MOVE
+document.addEventListener("touchmove", (e) => {
+    let rect = canvas.getBoundingClientRect();
+    player.x = e.touches[0].clientX - rect.left;
+});
+
+// GAME OVER
+function gameOver() {
+    alert("Game Over");
+    location.reload();
 }
