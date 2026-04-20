@@ -1,8 +1,8 @@
 /* style.css */
 body {
   margin: 0;
-  font-family: Arial;
   overflow: hidden;
+  font-family: Arial;
 }
 
 /* screens */
@@ -23,7 +23,7 @@ body {
   object-fit: cover;
 }
 
-/* MENU IMAGE BUTTONS */
+/* MENU */
 .menu-buttons {
   position: absolute;
   top: 38%;
@@ -31,37 +31,43 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 18px;
+  gap: 12px; /* ровный отступ */
 }
 
-.menu-img-btn {
+.menu-btn {
   width: 280px;
   height: auto;
 }
 
-/* SHOP */
-.shop-container {
+/* GAME */
+#gameCanvas {
+  width: 100%;
+  height: 100%;
+  background: black;
+}
+
+/* SHOP GRID */
+.shop-grid {
   position: absolute;
-  top: 28%;
+  top: 30%;
   width: 100%;
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 25px;
-  padding: 0 20px;
+  justify-items: center;
+  gap: 25px 10px;
 }
 
 .shop-item {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
 }
 
 .shop-icon {
-  width: 80px;
+  width: 70px;
 }
 
-/* PRICE IMAGE */
 .price-btn {
   width: 90px;
 }
@@ -77,10 +83,4 @@ body {
   border-radius: 25px;
   color: white;
   font-weight: bold;
-  font-size: 18px;
-}
-
-/* SHAPES (if needed later) */
-.shape {
-  width: 60px;
 }
