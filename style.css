@@ -1,8 +1,6 @@
-/* RESET */
 body {
     margin: 0;
     overflow: hidden;
-    font-family: Arial, sans-serif;
 }
 
 /* SCREENS */
@@ -66,7 +64,7 @@ body {
     width: 120px;
 }
 
-/* BACK BUTTON */
+/* BACK */
 .back-btn {
     position: absolute;
     bottom: 8%;
@@ -77,8 +75,6 @@ body {
     padding: 14px 40px;
     border-radius: 25px;
     font-weight: bold;
-    text-align: center;
-    width: 220px;
 }
 
 /* GAME */
@@ -87,9 +83,7 @@ body {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-
     width: 280px;
     height: 460px;
-
-    border-radius: 25px;
+    border-radius: 20px;
 }
