@@ -1,117 +1,112 @@
-// SCREENS
-const menu = document.getElementById("menu");
-const game = document.getElementById("game");
-
-// BUTTONS
-const startBtn = document.getElementById("startBtn");
-const shopBtn = document.getElementById("shopBtn");
-const appearanceBtn = document.getElementById("appearanceBtn");
-const leaderboardBtn = document.getElementById("leaderboardBtn");
-
-// CANVAS
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 
 canvas.width = 280;
 canvas.height = 460;
 
-// ASSETS
+/* SCREENS */
+const screens = {
+    menu: document.getElementById("menu"),
+    game: document.getElementById("game"),
+    shop: document.getElementById("shop")
+};
+
+function showScreen(name) {
+    Object.values(screens).forEach(s => s.classList.remove("active"));
+    screens[name].classList.add("active");
+}
+
+/* BUTTONS */
+document.getElementById("startBtn").onclick = () => {
+    showScreen("game");
+    startGame();
+};
+
+document.getElementById("shopBtn").onclick = () => showScreen("shop");
+
+document.getElementById("appearanceBtn").onclick = () => alert("Soon");
+document.getElementById("leaderboardBtn").onclick = () => alert("Soon");
+
+document.getElementById("backBtn").onclick = () => showScreen("menu");
+
+/* GAME LOGIC */
+
+let ball = { x: 140, y: 400, size: 20, dx: 3 };
+let lines = [];
+let running = false;
+
 const ballImg = new Image();
 ballImg.src = "assets/ball.png";
 
 const lineImg = new Image();
 lineImg.src = "assets/line.png";
 
-// PLAYER
-let player = {
-    x: canvas.width / 2,
-    y: canvas.height - 40,
-    radius: 12
-};
+function startGame() {
+    ball.x = 140;
+    ball.y = 400;
+    lines = [];
+    running = true;
+}
 
-// PLATFORMS
-let lines = [];
-
-// START GAME
-startBtn.onclick = () => {
-    menu.classList.remove("active");
-    game.classList.add("active");
-    startGame();
-};
-
-// OTHER BUTTONS
-shopBtn.onclick = () => alert("Shop soon");
-appearanceBtn.onclick = () => alert("Appearance soon");
-leaderboardBtn.onclick = () => alert("Leaderboard soon");
-
-// SPAWN LINES
 function spawnLine() {
+    const width = 100 + Math.random() * 80;
+
     lines.push({
-        x: Math.random() * (canvas.width - 100),
+        x: Math.random() * (canvas.width - width),
         y: -20,
-        width: 100,
+        width: width,
         height: 12
     });
 }
 
-// DRAW PLAYER
-function drawPlayer() {
-    ctx.drawImage(
-        ballImg,
-        player.x - player.radius,
-        player.y - player.radius,
-        player.radius * 2,
-        player.radius * 2
-    );
-}
-
-// DRAW LINE (PNG)
-function drawLine(l) {
-    ctx.drawImage(lineImg, l.x, l.y, l.width, l.height);
-}
-
-// UPDATE LOOP
 function update() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    if (!running) return;
 
-    drawPlayer();
+    ball.x += ball.dx;
 
-    for (let l of lines) {
-        l.y += 3;
-        drawLine(l);
-
-        // COLLISION
-        if (
-            player.y + player.radius > l.y &&
-            player.y - player.radius < l.y + l.height &&
-            player.x > l.x &&
-            player.x < l.x + l.width
-        ) {
-            gameOver();
-            return;
-        }
+    if (ball.x < 0 || ball.x > canvas.width - ball.size) {
+        ball.dx *= -1;
     }
 
-    requestAnimationFrame(update);
+    if (Math.random() < 0.02) spawnLine();
+
+    lines.forEach(line => line.y += 3);
+
+    // collision
+    lines.forEach(line => {
+        if (
+            ball.x < line.x + line.width &&
+            ball.x + ball.size > line.x &&
+            ball.y < line.y + line.height &&
+            ball.y + ball.size > line.y
+        ) {
+            running = false;
+            setTimeout(() => {
+                alert("Game Over");
+                startGame();
+            }, 100);
+        }
+    });
+
+    lines = lines.filter(l => l.y < canvas.height);
 }
 
-// START
-function startGame() {
-    lines = [];
+function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    setInterval(spawnLine, 1200);
+    // lines
+    lines.forEach(line => {
+        ctx.drawImage(lineImg, line.x, line.y, line.width, line.height);
+    });
 
+    // ball
+    ctx.drawImage(ballImg, ball.x, ball.y, ball.size, ball.size);
+}
+
+function loop() {
     update();
+    draw();
+    requestAnimationFrame(loop);
 }
 
-// TOUCH MOVE
-document.addEventListener("touchmove", (e) => {
-    let rect = canvas.getBoundingClientRect();
-    player.x = e.touches[0].clientX - rect.left;
-});
-
-// GAME OVER
-function gameOver() {
-    alert("Game Over");
-    location.reload();
-}
+loop();
