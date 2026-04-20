@@ -1,5 +1,11 @@
-body {
+/* RESET */
+* {
   margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
   overflow: hidden;
   font-family: Arial, sans-serif;
 }
@@ -22,6 +28,7 @@ body {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  z-index: 0;
 }
 
 /* MENU */
@@ -33,6 +40,7 @@ body {
   flex-direction: column;
   align-items: center;
   gap: 14px;
+  z-index: 2;
 }
 
 .menu-btn {
@@ -49,6 +57,7 @@ body {
   flex-direction: column;
   align-items: center;
   gap: 25px;
+  z-index: 2;
 }
 
 .row {
@@ -76,6 +85,7 @@ body {
   text-align: center;
   width: 220px;
   cursor: pointer;
+  z-index: 2;
 }
 
 /* GAME */
@@ -84,7 +94,10 @@ body {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
+
   width: 280px;
   height: 460px;
+
   border-radius: 20px;
+  z-index: 2;
 }
