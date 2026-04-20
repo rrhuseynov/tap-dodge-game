@@ -5,17 +5,18 @@ function show(id) {
   document.getElementById(id).classList.add('active');
 }
 
-window.addEventListener("load", () => {
+window.onload = () => {
   setTimeout(() => {
     show("menu");
     init();
   }, 700);
-});
+};
 
 function init() {
 
   document.getElementById("startBtn").onclick = () => {
-    alert("Game next step");
+    show("game");
+    startGame();
   };
 
   document.getElementById("shopBtn").onclick = () => {
@@ -29,7 +30,7 @@ function init() {
   renderShop();
 }
 
-/* SHOP DATA — USING YOUR ASSETS */
+/* SHOP */
 const shopData = [
   { img: "assets/dot.png", price: "assets/price-100.png" },
   { img: "assets/z.png", price: "assets/price-300.png" },
@@ -44,7 +45,6 @@ function renderShop() {
   container.innerHTML = "";
 
   shopData.forEach(item => {
-
     const div = document.createElement("div");
     div.className = "shop-item";
 
@@ -55,4 +55,63 @@ function renderShop() {
 
     container.appendChild(div);
   });
+}
+
+/* SIMPLE GAMEPLAY */
+let canvas, ctx, player, obstacles;
+
+function startGame() {
+  canvas = document.getElementById("gameCanvas");
+  ctx = canvas.getContext("2d");
+
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+
+  player = { x: canvas.width / 2, y: canvas.height - 100, r: 20 };
+  obstacles = [];
+
+  canvas.onclick = () => {
+    player.x = Math.random() * canvas.width;
+  };
+
+  gameLoop();
+}
+
+function gameLoop() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  // player
+  ctx.fillStyle = "lime";
+  ctx.beginPath();
+  ctx.arc(player.x, player.y, player.r, 0, Math.PI * 2);
+  ctx.fill();
+
+  // spawn obstacles
+  if (Math.random() < 0.03) {
+    obstacles.push({
+      x: Math.random() * canvas.width,
+      y: 0,
+      size: 30
+    });
+  }
+
+  // draw obstacles
+  ctx.fillStyle = "red";
+  obstacles.forEach(o => {
+    o.y += 5;
+    ctx.fillRect(o.x, o.y, o.size, o.size);
+
+    // collision
+    if (
+      o.x < player.x + player.r &&
+      o.x + o.size > player.x - player.r &&
+      o.y < player.y + player.r &&
+      o.y + o.size > player.y - player.r
+    ) {
+      alert("Game Over");
+      show("menu");
+    }
+  });
+
+  requestAnimationFrame(gameLoop);
 }
