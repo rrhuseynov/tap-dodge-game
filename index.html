@@ -1,4 +1,3 @@
-<!-- index.html -->
 <!DOCTYPE html>
 <html>
 <head>
@@ -10,26 +9,30 @@
 
 <body>
 
+<!-- WELCOME -->
 <div id="welcome" class="screen active">
   <img src="assets/welcome.png" class="bg">
 </div>
 
+<!-- MENU -->
 <div id="menu" class="screen">
   <img src="assets/main_menu.PNG" class="bg">
 
   <div class="menu">
-    <img src="assets/start.png" id="startBtn">
-    <img src="assets/shop.png" id="shopBtn">
-    <img src="assets/appearance.png" id="appearanceBtn">
-    <img src="assets/leaderboard.png" id="leaderboardBtn">
+    <img src="assets/start.png" id="startBtn" class="menu-btn">
+    <img src="assets/shop.png" id="shopBtn" class="menu-btn">
+    <img src="assets/appearance.png" id="appearanceBtn" class="menu-btn">
+    <img src="assets/leaderboard.png" id="leaderboardBtn" class="menu-btn">
   </div>
 </div>
 
+<!-- GAME -->
 <div id="game" class="screen">
   <img src="assets/game_bg.png" class="bg">
   <canvas id="gameCanvas"></canvas>
 </div>
 
+<!-- SHOP -->
 <div id="shop" class="screen">
   <img src="assets/shop_bg.png" class="bg">
 
@@ -52,7 +55,7 @@
 
   </div>
 
-  <div id="backBtn">BACK</div>
+  <div id="backBtn" class="back-btn">BACK</div>
 </div>
 
 <script src="game.js"></script>
